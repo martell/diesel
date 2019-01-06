@@ -51,8 +51,8 @@
 /// }
 ///
 /// pub mod dsl {
-///     pub use functions::*;
-///     pub use helper_types::*;
+///     pub use super::functions::*;
+///     pub use super::helper_types::*;
 /// }
 /// ```
 ///
@@ -164,7 +164,7 @@
 /// ```
 macro_rules! sql_function {
     ($($args:tt)*) => {
-        sql_function_proc! { $($args)* }
+        $crate::sql_function_proc! { $($args)* }
     }
 }
 
@@ -191,7 +191,7 @@ macro_rules! no_arg_sql_function_body_except_to_sql {
 #[doc(hidden)]
 macro_rules! no_arg_sql_function_body {
     ($type_name:ident, $return_type:ty, $docs:expr, $($constraint:ident)::+) => {
-        no_arg_sql_function_body_except_to_sql!($type_name, $return_type, $docs);
+        $crate::no_arg_sql_function_body_except_to_sql!($type_name, $return_type, $docs);
 
         impl<DB> $crate::query_builder::QueryFragment<DB> for $type_name where
             DB: $crate::backend::Backend + $($constraint)::+,
@@ -204,7 +204,7 @@ macro_rules! no_arg_sql_function_body {
     };
 
     ($type_name:ident, $return_type:ty, $docs:expr) => {
-        no_arg_sql_function_body_except_to_sql!($type_name, $return_type, $docs);
+        $crate::no_arg_sql_function_body_except_to_sql!($type_name, $return_type, $docs);
 
         impl<DB> $crate::query_builder::QueryFragment<DB> for $type_name where
             DB: $crate::backend::Backend,
@@ -234,15 +234,15 @@ macro_rules! no_arg_sql_function_body {
 /// function.
 macro_rules! no_arg_sql_function {
     ($type_name:ident, $return_type:ty) => {
-        no_arg_sql_function!($type_name, $return_type, "");
+        $crate::no_arg_sql_function!($type_name, $return_type, "");
     };
 
     ($type_name:ident, $return_type:ty, $docs:expr) => {
-        no_arg_sql_function_body!($type_name, $return_type, $docs);
+        $crate::no_arg_sql_function_body!($type_name, $return_type, $docs);
     };
 
     ($type_name:ident, $return_type:ty, $docs:expr, $($constraint:ident)::+) => {
-        no_arg_sql_function_body!($type_name, $return_type, $docs, $($constraint)::+);
+        $crate::no_arg_sql_function_body!($type_name, $return_type, $docs, $($constraint)::+);
     };
 }
 

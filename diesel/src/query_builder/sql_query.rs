@@ -42,7 +42,7 @@ impl<Inner> SqlQuery<Inner> {
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// #
-    /// # use schema::users;
+    /// # use self::schema::users;
     /// #
     /// # #[derive(QueryableByName, Debug, PartialEq)]
     /// # #[table_name="users"]

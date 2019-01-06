@@ -91,7 +91,7 @@ pub trait QueryDsl: Sized {
     /// # }
     /// #
     /// # fn run_test() -> QueryResult<()> {
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// #     connection.execute("DELETE FROM users").unwrap();
     /// diesel::insert_into(users)
@@ -119,7 +119,7 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::animals;
+    /// # use self::schema::animals;
     /// #
     /// # #[derive(Queryable, Debug, PartialEq)]
     /// # struct Animal {
@@ -191,7 +191,7 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::users;
+    /// # use self::schema::users;
     /// #
     /// # fn main() {
     /// #     run_test().unwrap();
@@ -215,7 +215,7 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::{users, posts};
+    /// # use self::schema::{users, posts};
     /// #
     /// # #[derive(Queryable, PartialEq, Eq, Debug)]
     /// # struct User {
@@ -300,7 +300,7 @@ pub trait QueryDsl: Sized {
     /// # include!("../doctest_setup.rs");
     /// #
     /// # fn main() {
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// let count = users.count().get_result(&connection);
     /// assert_eq!(Ok(2), count);
@@ -367,7 +367,7 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::{users, posts};
+    /// # use self::schema::{users, posts};
     /// # /*
     /// joinable!(posts -> users (user_id));
     /// allow_tables_to_appear_in_same_query!(users, posts);
@@ -395,7 +395,7 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::{users, posts};
+    /// # use self::schema::{users, posts};
     /// #
     /// # /*
     /// allow_tables_to_appear_in_same_query!(users, posts);
@@ -465,7 +465,7 @@ pub trait QueryDsl: Sized {
     /// # include!("../doctest_setup.rs");
     /// #
     /// # fn main() {
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// let seans_id = users.filter(name.eq("Sean")).select(id)
     ///     .first(&connection);
@@ -500,7 +500,7 @@ pub trait QueryDsl: Sized {
     /// # }
     /// #
     /// # fn run_test() -> QueryResult<()> {
-    /// #     use schema::animals::dsl::*;
+    /// #     use self::schema::animals::dsl::*;
     /// #     let connection = establish_connection();
     /// #     diesel::delete(animals).execute(&connection)?;
     /// diesel::insert_into(animals)
@@ -540,7 +540,7 @@ pub trait QueryDsl: Sized {
     /// # include!("../doctest_setup.rs");
     /// #
     /// # fn main() {
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     use diesel::result::Error::NotFound;
     /// #     let connection = establish_connection();
     /// let sean = (1, "Sean".to_string());
@@ -581,7 +581,7 @@ pub trait QueryDsl: Sized {
     /// # }
     /// #
     /// # fn run_test() -> QueryResult<()> {
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// #     connection.execute("DELETE FROM users")?;
     /// diesel::insert_into(users)
@@ -649,7 +649,7 @@ pub trait QueryDsl: Sized {
     /// # }
     /// #
     /// # fn run_test() -> QueryResult<()> {
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// #     connection.execute("DELETE FROM users")?;
     /// diesel::insert_into(users)
@@ -691,14 +691,14 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::users;
+    /// # use self::schema::users;
     /// #
     /// # fn main() {
     /// #     run_test().unwrap();
     /// # }
     /// #
     /// # fn run_test() -> QueryResult<()> {
-    /// #     use users::dsl::*;
+    /// #     use self::users::dsl::*;
     /// #     let connection = establish_connection();
     /// #     diesel::delete(users).execute(&connection)?;
     /// #     diesel::insert_into(users)
@@ -741,14 +741,14 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::users;
+    /// # use self::schema::users;
     /// #
     /// # fn main() {
     /// #     run_test().unwrap();
     /// # }
     /// #
     /// # fn run_test() -> QueryResult<()> {
-    /// #     use users::dsl::*;
+    /// #     use self::users::dsl::*;
     /// #     let connection = establish_connection();
     /// #     diesel::delete(users).execute(&connection)?;
     /// #     diesel::insert_into(users)
@@ -924,7 +924,7 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::users;
+    /// # use self::schema::users;
     /// #
     /// # fn main() {
     /// #     use std::collections::HashMap;
@@ -955,7 +955,7 @@ pub trait QueryDsl: Sized {
     /// ```rust
     /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
-    /// # use schema::users;
+    /// # use self::schema::users;
     /// #
     /// # fn main() {
     /// #     let connection = establish_connection();
@@ -998,8 +998,8 @@ pub trait QueryDsl: Sized {
     /// #
     /// # fn run_test() -> QueryResult<()> {
     /// #     use diesel::insert_into;
-    /// #     use schema::users::dsl::*;
-    /// #     use schema::posts;
+    /// #     use self::schema::users::dsl::*;
+    /// #     use self::schema::posts;
     /// #     let connection = establish_connection();
     /// insert_into(posts::table)
     ///     .values(posts::user_id.eq(1))
@@ -1087,7 +1087,7 @@ pub trait RunQueryDsl<Conn>: Sized {
     /// #
     /// # fn run_test() -> QueryResult<()> {
     /// #     use diesel::insert_into;
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// let inserted_rows = insert_into(users)
     ///     .values(name.eq("Ruby"))
@@ -1141,7 +1141,7 @@ pub trait RunQueryDsl<Conn>: Sized {
     /// #
     /// # fn run_test() -> QueryResult<()> {
     /// #     use diesel::insert_into;
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// let data = users.select(name)
     ///     .load::<String>(&connection)?;
@@ -1162,7 +1162,7 @@ pub trait RunQueryDsl<Conn>: Sized {
     /// #
     /// # fn run_test() -> QueryResult<()> {
     /// #     use diesel::insert_into;
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// let data = users
     ///     .load::<(i32, String)>(&connection)?;
@@ -1193,7 +1193,7 @@ pub trait RunQueryDsl<Conn>: Sized {
     /// #
     /// # fn run_test() -> QueryResult<()> {
     /// #     use diesel::insert_into;
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// let data = users
     ///     .load::<User>(&connection)?;
@@ -1235,7 +1235,7 @@ pub trait RunQueryDsl<Conn>: Sized {
     /// # #[cfg(feature = "postgres")]
     /// # fn run_test() -> QueryResult<()> {
     /// #     use diesel::{insert_into, update};
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// let inserted_row = insert_into(users)
     ///     .values(name.eq("Ruby"))
@@ -1293,7 +1293,7 @@ pub trait RunQueryDsl<Conn>: Sized {
     /// # }
     /// #
     /// # fn run_test() -> QueryResult<()> {
-    /// #     use schema::users::dsl::*;
+    /// #     use self::schema::users::dsl::*;
     /// #     let connection = establish_connection();
     /// diesel::insert_into(users)
     ///     .values(&vec![name.eq("Sean"), name.eq("Pascal")])

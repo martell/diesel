@@ -13,6 +13,8 @@
 /// given, and a module with a helper type representing the return type of your
 /// function. For example, this invocation:
 ///
+/// [`diesel::sql_types`]: sql_types/index.html
+///
 /// ```ignore
 /// sql_function!(fn lower(x: Text) -> Text);
 /// ```

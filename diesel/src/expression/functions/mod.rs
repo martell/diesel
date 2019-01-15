@@ -62,7 +62,7 @@
 /// # Adding Doc Comments
 ///
 /// ```no_run
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// # use diesel::*;
 /// #
 /// # table! { crates { id -> Integer, name -> VarChar, } }
@@ -101,7 +101,7 @@
 /// of all of this:
 ///
 /// ```no_run
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// # use diesel::*;
 /// #
 /// # table! { crates { id -> Integer, name -> VarChar, } }
@@ -133,7 +133,7 @@
 /// are not supported on SQLite.
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// # use diesel::*;
 /// #
 /// # #[cfg(feature = "sqlite")]

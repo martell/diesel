@@ -1,7 +1,7 @@
 use proc_macro2::*;
 use syn;
 
-use util::*;
+use crate::util::*;
 
 pub fn derive(mut item: syn::DeriveInput) -> Result<TokenStream, Diagnostic> {
     let type_params = item

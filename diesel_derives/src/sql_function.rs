@@ -3,8 +3,8 @@ use quote::ToTokens;
 use syn::parse::{self, Parse, ParseStream};
 use syn::punctuated::Punctuated;
 
-use meta::*;
-use util::*;
+use crate::meta::*;
+use crate::util::*;
 
 // Extremely curious why this triggers on a nearly branchless function
 #[allow(clippy::cyclomatic_complexity)]

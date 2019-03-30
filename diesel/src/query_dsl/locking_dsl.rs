@@ -1,5 +1,3 @@
-#[cfg(feature = "with-deprecated")]
-use crate::query_builder::locking_clause::ForUpdate;
 use crate::query_builder::AsQuery;
 use crate::query_source::Table;
 

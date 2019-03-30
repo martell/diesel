@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::io::Write;
 
-use crate::{self, Backend, HasRawValue};
+use crate::backend::{Backend, HasRawValue};
 use crate::deserialize::{self, FromSql, FromSqlRow, Queryable};
 use crate::serialize::{self, IsNull, Output, ToSql};
 use crate::sql_types::{

@@ -54,7 +54,7 @@ impl UsesInformationSchema for Mysql {
         C: Connection,
         String: FromSql<sql_types::Text, C::Backend>,
     {
-        no_arg_sql_function!(database, sql_types::VarChar);
+        diesel::no_arg_sql_function!(database, sql_types::VarChar);
         select(database).get_result(conn)
     }
 }

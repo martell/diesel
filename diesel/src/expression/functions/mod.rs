@@ -68,6 +68,7 @@
 /// # table! { crates { id -> Integer, name -> VarChar, } }
 /// #
 /// use diesel::sql_types::Text;
+/// use diesel::query_builder::QueryId;
 ///
 /// sql_function! {
 ///     /// Represents the `canon_crate_name` SQL function, created in
@@ -107,6 +108,7 @@
 /// # table! { crates { id -> Integer, name -> VarChar, } }
 /// #
 /// use diesel::sql_types::Foldable;
+/// use diesel::query_builder::QueryId;
 ///
 /// sql_function! {
 ///     #[aggregate]
@@ -146,6 +148,7 @@
 /// # }
 /// #
 /// use diesel::sql_types::{Integer, Double};
+/// use diesel::query_builder::QueryId;
 /// sql_function!(fn add_mul(x: Integer, y: Integer, z: Double) -> Double);
 ///
 /// # #[cfg(feature = "sqlite")]
@@ -174,7 +177,7 @@ macro_rules! no_arg_sql_function_body_except_to_sql {
     ($type_name:ident, $return_type:ty, $docs:expr) => {
         #[allow(non_camel_case_types)]
         #[doc=$docs]
-        #[derive(Debug, Clone, Copy, QueryId, NonAggregate)]
+        #[derive(Debug, Clone, Copy, $crate::query_builder::QueryId, NonAggregate)]
         pub struct $type_name;
 
         impl $crate::expression::Expression for $type_name {
@@ -224,9 +227,9 @@ macro_rules! no_arg_sql_function_body {
 /// generated using:
 ///
 /// ```no_run
-/// # #[macro_use] extern crate diesel;
-/// # pub use diesel::*;
-/// no_arg_sql_function!(now, sql_types::Timestamp, "Represents the SQL NOW() function");
+/// # extern crate diesel;
+/// # use diesel::*;
+/// diesel::no_arg_sql_function!(now, sql_types::Timestamp, "Represents the SQL NOW() function");
 /// # fn main() {}
 /// ```
 ///

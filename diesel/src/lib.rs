@@ -300,9 +300,9 @@ pub mod prelude {
         since = "1.1.0",
         note = "Explicitly `use diesel::deserialize::Queryable"
     )]
-    pub use deserialize::{Queryable, QueryableByName};
+    pub use deserialize::{FromSqlRow, Queryable, QueryableByName};
     pub use expression::{
-        AppearsOnTable, BoxableExpression, Expression, IntoSql, SelectableExpression,
+        AppearsOnTable, AsExpression, BoxableExpression, Expression, IntoSql, SelectableExpression,
     };
 
     pub use expression_methods::*;

@@ -13,7 +13,7 @@ use sql_types::Bool;
 /// # Example
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # fn main() {

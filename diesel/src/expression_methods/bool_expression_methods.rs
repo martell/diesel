@@ -10,7 +10,7 @@ pub trait BoolExpressionMethods: Expression<SqlType = Bool> + Sized {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// #
     /// # fn main() {
@@ -50,7 +50,7 @@ pub trait BoolExpressionMethods: Expression<SqlType = Bool> + Sized {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// #
     /// # fn main() {

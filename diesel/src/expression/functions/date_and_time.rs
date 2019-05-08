@@ -33,7 +33,7 @@ sql_function! {
     /// # Examples
 
     /// ```ignore
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # extern crate chrono;
     /// # include!(\"../../doctest_setup.rs\");
     /// # use diesel::dsl::*;

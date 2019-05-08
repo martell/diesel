@@ -48,7 +48,7 @@ pub trait Connection: SimpleConnection + Sized + Send {
     /// # Example
     ///
     /// ```rust
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// use diesel::result::Error;
     ///
@@ -121,7 +121,7 @@ pub trait Connection: SimpleConnection + Sized + Send {
     /// # Example
     ///
     /// ```rust
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// use diesel::result::Error;
     ///

@@ -39,7 +39,7 @@ impl<Inner> SqlQuery<Inner> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// #
     /// # use schema::users;

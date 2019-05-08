@@ -181,7 +181,7 @@ macro_rules! __diesel_operator_to_sql {
 /// ## Example usage
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # fn main() {

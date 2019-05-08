@@ -110,7 +110,7 @@ macro_rules! __diesel_column {
 /// -------------
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// table! {
 ///     users {
 ///         id -> Integer,
@@ -125,7 +125,7 @@ macro_rules! __diesel_column {
 /// Tables with no primary key are not supported.
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// table! {
 ///     users (non_standard_primary_key) {
 ///         non_standard_primary_key -> Integer,
@@ -140,7 +140,7 @@ macro_rules! __diesel_column {
 /// primary key.
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// table! {
 ///     followings (user_id, post_id) {
 ///         user_id -> Integer,
@@ -161,7 +161,7 @@ macro_rules! __diesel_column {
 /// which types to import.
 ///
 /// ```
-/// #[macro_use] extern crate diesel;
+/// extern crate diesel;
 /// # /*
 /// extern crate diesel_full_text_search;
 /// # */
@@ -186,7 +186,7 @@ macro_rules! __diesel_column {
 /// following syntax:
 ///
 /// ```
-/// #[macro_use] extern crate diesel;
+/// extern crate diesel;
 ///
 /// table! {
 ///
@@ -205,7 +205,7 @@ macro_rules! __diesel_column {
 /// the `sql_name` attribute like this:
 ///
 /// ```
-/// #[macro_use] extern crate diesel;
+/// extern crate diesel;
 ///
 /// table! {
 ///     posts {
@@ -898,7 +898,7 @@ macro_rules! __diesel_table_query_source_impl {
 /// # Example
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
+/// # extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// use schema::*;
 ///

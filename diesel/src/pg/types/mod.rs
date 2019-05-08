@@ -252,7 +252,7 @@ pub mod sql_types {
     /// ```rust
     /// # #![allow(dead_code)]
     /// extern crate serde_json;
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// #
     /// table! {
@@ -307,7 +307,7 @@ pub mod sql_types {
     ///
     /// ```rust
     /// # #![allow(dead_code)]
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// use diesel::data_types::Cents;
     ///
@@ -356,7 +356,7 @@ pub mod sql_types {
     ///
     /// ```rust
     /// # #![allow(dead_code)]
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// table! {
     ///     devices {
@@ -406,7 +406,7 @@ pub mod sql_types {
     ///
     /// ```rust
     /// # #![allow(dead_code)]
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// #
     /// extern crate ipnetwork;
@@ -458,7 +458,7 @@ pub mod sql_types {
     ///
     /// ```rust
     /// # #![allow(dead_code)]
-    /// # #[macro_use] extern crate diesel;
+    /// # extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// extern crate ipnetwork;
     /// use ipnetwork::IpNetwork;

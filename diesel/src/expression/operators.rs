@@ -63,7 +63,7 @@ macro_rules! __diesel_operator_body {
         expression_ty_params = ($($expression_ty_params:ident,)*),
         expression_bounds = ($($expression_bounds:tt)*),
     ) => {
-        #[derive(Debug, Clone, Copy, QueryId, DieselNumericOps, NonAggregate)]
+        #[derive(Debug, Clone, Copy, $crate::query_builder::QueryId, DieselNumericOps, NonAggregate)]
         #[doc(hidden)]
         pub struct $name<$($ty_param,)+> {
             $(pub(crate) $field_name: $ty_param,)+
@@ -187,7 +187,7 @@ macro_rules! __diesel_operator_to_sql {
 /// # fn main() {
 /// #     use schema::users::dsl::*;
 /// #     let connection = establish_connection();
-/// infix_operator!(MyEq, " = ");
+/// diesel::infix_operator!(MyEq, " = ");
 ///
 /// use diesel::expression::AsExpression;
 ///

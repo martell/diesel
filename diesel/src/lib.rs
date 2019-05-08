@@ -134,7 +134,9 @@ extern crate diesel_derives;
 
 // Re-exports derive macros that do not map to exactly one Diesel trait.
 #[doc(hidden)]
-pub use diesel_derives::{DieselNumericOps, SqlType, Associations, NonAggregate, sql_function_proc};
+pub use diesel_derives::{
+    sql_function_proc, Associations, DieselNumericOps, NonAggregate, SqlType,
+};
 
 #[macro_use]
 mod macros;

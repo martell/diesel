@@ -50,7 +50,7 @@ impl<T, U> DeleteStatement<T, U, NoReturningClause> {
     /// # Example
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// #
     /// # fn main() {
@@ -88,7 +88,7 @@ impl<T, U> DeleteStatement<T, U, NoReturningClause> {
     /// ### Example
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// #
     /// # fn main() {
@@ -207,7 +207,7 @@ impl<T, U> DeleteStatement<T, U, NoReturningClause> {
     /// ### Deleting a record:
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// #
     /// # #[cfg(feature = "postgres")]

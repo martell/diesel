@@ -1,4 +1,4 @@
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 use diesel::*;
 use diesel::dsl::exists;

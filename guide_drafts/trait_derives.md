@@ -12,7 +12,7 @@ In this guide,
 we will cover each trait in detail in terms of its use cases 
 and usage considerations.
 To be able to use these derives,
-make sure you have `extern crate diesel;` at the root of your project.
+make sure you have `#[macro_use] extern crate diesel;` at the root of your project.
 
 Throughout this guide,
 we will be looking at examples for each trait individually and how they interact with each other.
@@ -85,7 +85,7 @@ pub struct EmailUser {
 
 ```rust
 // File: src/main.rs
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 use diesel::prelude::*;
 
@@ -250,7 +250,7 @@ pub struct PostsWithUserName {
 
 ```rust
 // File: src/main.rs
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 use diesel::prelude::*;
 use diesel::sql_query;
@@ -404,7 +404,7 @@ pub struct NewUser<'a> {
 
 ```rust
 // File: src/main.rs
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 use diesel::prelude::*;
 
@@ -494,7 +494,7 @@ pub struct NewUser<'a> {
 
 ```rust
 // File: src/main.rs
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 use diesel::prelude::*;
 
@@ -679,7 +679,7 @@ pub struct NullNoneFieldsUpdateUser<'a> {
 
 ```rust
 // File: src/main.rs
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 use diesel::prelude::*;
 
@@ -880,7 +880,7 @@ pub struct NewPost<'a> {
 
 ```rust
 // File: src/main.rs
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 use diesel::prelude::*;
 

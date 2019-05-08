@@ -38,7 +38,7 @@ impl<ST, T> SqlLiteral<ST, T> {
     /// # Examples
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// #
     /// # table! {
@@ -69,7 +69,7 @@ impl<ST, T> SqlLiteral<ST, T> {
     /// ### Multiple Bind Params
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     ///
     /// # table! {
@@ -121,7 +121,7 @@ impl<ST, T> SqlLiteral<ST, T> {
     /// # Examples
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     ///
     /// # table! {
@@ -208,7 +208,7 @@ impl<ST, T> NonAggregate for SqlLiteral<ST, T> {}
 /// # Examples
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// # fn main() {
 /// #     run_test().unwrap();
@@ -261,7 +261,7 @@ where
     /// # Examples
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     ///
     /// # table! {

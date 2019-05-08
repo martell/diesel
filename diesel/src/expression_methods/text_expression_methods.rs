@@ -9,7 +9,7 @@ pub trait TextExpressionMethods: Expression + Sized {
     /// # Example
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// #
     /// # table! {
@@ -69,7 +69,7 @@ pub trait TextExpressionMethods: Expression + Sized {
     /// # Examples
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// #
     /// # fn main() {
@@ -102,7 +102,7 @@ pub trait TextExpressionMethods: Expression + Sized {
     /// # Examples
     ///
     /// ```rust
-    /// # extern crate diesel;
+    /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// #
     /// # fn main() {

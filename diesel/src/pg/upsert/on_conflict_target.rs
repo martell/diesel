@@ -11,7 +11,7 @@ use result::QueryResult;
 /// # Example
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("on_conflict_docs_setup.rs");
 /// #
 /// # fn main() {

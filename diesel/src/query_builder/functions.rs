@@ -21,7 +21,7 @@ use query_dsl::methods::SelectDsl;
 /// # Examples
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # #[cfg(feature = "postgres")]
@@ -46,7 +46,7 @@ use query_dsl::methods::SelectDsl;
 /// [`set`]: query_builder/struct.UpdateStatement.html#method.set
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # table! {
@@ -95,7 +95,7 @@ pub fn update<T: IntoUpdateTarget>(source: T) -> UpdateStatement<T::Table, T::Wh
 /// ### Deleting a single record:
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # fn main() {
@@ -116,7 +116,7 @@ pub fn update<T: IntoUpdateTarget>(source: T) -> UpdateStatement<T::Table, T::Wh
 /// ### Deleting a whole table:
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # fn main() {
@@ -154,7 +154,7 @@ pub fn delete<T: IntoUpdateTarget>(source: T) -> DeleteStatement<T::Table, T::Wh
 /// # Examples
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # fn main() {
@@ -182,7 +182,7 @@ pub fn delete<T: IntoUpdateTarget>(source: T) -> DeleteStatement<T::Table, T::Wh
 /// ### Using a tuple for values
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # fn main() {
@@ -212,7 +212,7 @@ pub fn delete<T: IntoUpdateTarget>(source: T) -> DeleteStatement<T::Table, T::Wh
 /// ### Using struct for values
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// # use schema::users;
 /// #
@@ -259,7 +259,7 @@ pub fn delete<T: IntoUpdateTarget>(source: T) -> DeleteStatement<T::Table, T::Wh
 /// [`.into_columns`]: query_builder/struct.InsertStatement.html#method.into_columns
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # fn main() {
@@ -292,7 +292,7 @@ pub fn delete<T: IntoUpdateTarget>(source: T) -> DeleteStatement<T::Table, T::Wh
 /// ### With return value
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # #[cfg(feature = "postgres")]
@@ -328,7 +328,7 @@ pub fn insert_into<T>(target: T) -> IncompleteInsertStatement<T, Insert> {
 /// # Example
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # fn main() {
@@ -387,7 +387,7 @@ where
 /// # Example
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # #[cfg(not(feature = "postgres"))]
@@ -436,7 +436,7 @@ pub fn replace_into<T>(target: T) -> IncompleteInsertStatement<T, Replace> {
 /// # Example
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// #
 /// # use schema::users;

@@ -272,7 +272,7 @@ impl<T: Query> AsQuery for T {
 /// ```rust
 /// # include!("../doctest_setup.rs");
 /// #
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # use diesel::*;
 /// # use schema::*;
 /// #

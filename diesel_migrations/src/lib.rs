@@ -145,7 +145,7 @@ pub mod connection {
 /// # Examples
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # #[macro_use] extern crate diesel_migrations;
 /// # include!("../../diesel/src/doctest_setup.rs");
 /// # diesel::table! {

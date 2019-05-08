@@ -10,7 +10,7 @@ use data_types::PgInterval;
 /// # Examples
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../../../doctest_setup.rs");
 /// # use diesel::dsl::*;
 /// #
@@ -42,7 +42,7 @@ use data_types::PgInterval;
 /// ```
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// # include!("../../../doctest_setup.rs");
 /// # use diesel::dsl::*;
 /// #

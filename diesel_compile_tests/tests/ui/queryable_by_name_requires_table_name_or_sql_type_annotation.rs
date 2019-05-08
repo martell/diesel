@@ -1,4 +1,4 @@
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 #[derive(QueryableByName)]
 struct Foo {

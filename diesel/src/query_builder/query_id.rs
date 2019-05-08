@@ -19,7 +19,7 @@ use std::any::{Any, TypeId};
 /// For example, given this struct:
 ///
 /// ```rust
-/// # extern crate diesel;
+/// # #[macro_use] extern crate diesel;
 /// #[derive(QueryId)]
 /// pub struct And<Left, Right> {
 ///     left: Left,

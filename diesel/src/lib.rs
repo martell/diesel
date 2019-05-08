@@ -300,13 +300,17 @@ pub mod prelude {
         since = "1.1.0",
         note = "Explicitly `use diesel::deserialize::Queryable"
     )]
-    pub use deserialize::Queryable;
+    pub use deserialize::{Queryable, QueryableByName};
     pub use expression::{
         AppearsOnTable, BoxableExpression, Expression, IntoSql, SelectableExpression,
     };
+
     pub use expression_methods::*;
     #[doc(inline)]
     pub use insertable::Insertable;
+
+    pub use query_builder::{AsChangeset, QueryId};
+
     #[doc(hidden)]
     pub use query_dsl::GroupByDsl;
     pub use query_dsl::{BelongingToDsl, JoinOnDsl, QueryDsl, RunQueryDsl, SaveChangesDsl};

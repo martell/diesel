@@ -290,6 +290,9 @@ where
 /// ```
 pub trait NonAggregate {}
 
+#[doc(hidden)]
+pub use diesel_derives::NonAggregate;
+
 impl<T: NonAggregate + ?Sized> NonAggregate for Box<T> {}
 
 impl<'a, T: NonAggregate + ?Sized> NonAggregate for &'a T {}

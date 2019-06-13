@@ -268,8 +268,8 @@ pub mod helper_types {
     pub type LeftJoin<Source, Rhs> =
         <Source as JoinWithImplicitOnClause<Rhs, joins::LeftOuter>>::Output;
 
-    use super::associations::HasTable;
-    use super::query_builder::{AsChangeset, IntoUpdateTarget, UpdateStatement};
+    use $crate::associations::HasTable;
+    use $crate::query_builder::{AsChangeset, IntoUpdateTarget, UpdateStatement};
     /// Represents the return type of `update(lhs).set(rhs)`
     pub type Update<Target, Changes> = UpdateStatement<
         <Target as HasTable>::Table,

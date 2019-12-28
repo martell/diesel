@@ -131,7 +131,7 @@ impl PgConnection {
     ///     .run(|| Ok(()))
     /// # }
     /// ```
-    pub fn build_transaction(&self) -> TransactionBuilder {
+    pub fn build_transaction(&self) -> TransactionBuilder<Self> {
         TransactionBuilder::new(self)
     }
 

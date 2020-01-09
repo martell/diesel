@@ -1111,7 +1111,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "postgres")]
+    #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
     fn table_with_custom_schema() {
         use crate::pg::Pg;
         let expected_sql = r#"SELECT "foo"."bars"."baz" FROM "foo"."bars" -- binds: []"#;
@@ -1152,7 +1152,7 @@ mod tests {
     );
 
     #[test]
-    #[cfg(feature = "postgres")]
+    #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
     fn table_with_column_renaming_postgres() {
         use crate::pg::Pg;
         let expected_sql =
@@ -1199,7 +1199,7 @@ mod tests {
     );
 
     #[test]
-    #[cfg(feature = "postgres")]
+    #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
     fn table_renaming_postgres() {
         use crate::pg::Pg;
         let expected_sql = r#"SELECT "mod"."id" FROM "mod" -- binds: []"#;

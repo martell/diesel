@@ -250,7 +250,7 @@ impl<T, U, V> UpdateStatement<T, U, V, NoReturningClause> {
     /// ```rust
     /// # include!("../../doctest_setup.rs");
     /// #
-    /// # #[cfg(feature = "postgres")]
+    /// # #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
     /// # fn main() {
     /// #     use schema::users::dsl::*;
     /// #     let connection = establish_connection();

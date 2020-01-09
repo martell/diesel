@@ -158,7 +158,7 @@ pub trait QueryDsl: Sized {
     ///                    Animal::new("spider", None, 8)]), distinct_animals);
     /// # }
     /// ```
-    #[cfg(feature = "postgres")]
+    #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
     fn distinct_on<Expr>(self, expr: Expr) -> DistinctOn<Self, Expr>
     where
         Self: methods::DistinctOnDsl<Expr>,
@@ -1209,7 +1209,7 @@ pub trait RunQueryDsl<Conn>: Sized {
     /// #     run_test();
     /// # }
     /// #
-    /// # #[cfg(feature = "postgres")]
+    /// # #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
     /// # fn run_test() -> QueryResult<()> {
     /// #     use diesel::{insert_into, update};
     /// #     use schema::users::dsl::*;

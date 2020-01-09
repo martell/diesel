@@ -23,7 +23,7 @@ use crate::query_dsl::methods::SelectDsl;
 /// ```rust
 /// # include!("../doctest_setup.rs");
 /// #
-/// # #[cfg(feature = "postgres")]
+/// # #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
 /// # fn main() {
 /// #     use schema::users::dsl::*;
 /// #     let connection = establish_connection();
@@ -55,7 +55,7 @@ use crate::query_dsl::methods::SelectDsl;
 /// #     }
 /// # }
 /// #
-/// # #[cfg(feature = "postgres")]
+/// # #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
 /// # fn main() {
 /// # use self::users::dsl::*;
 /// # let connection = establish_connection();
@@ -286,7 +286,7 @@ pub fn delete<T: IntoUpdateTarget>(source: T) -> DeleteStatement<T::Table, T::Wh
 /// ```rust
 /// # include!("../doctest_setup.rs");
 /// #
-/// # #[cfg(feature = "postgres")]
+/// # #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
 /// # fn main() {
 /// #     use schema::users::dsl::*;
 /// #     let connection = establish_connection();
@@ -348,7 +348,7 @@ pub fn insert_into<T>(target: T) -> IncompleteInsertStatement<T, Insert> {
 /// #     Ok(())
 /// # }
 /// #
-/// # #[cfg(feature = "postgres")]
+/// # #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))]
 /// # fn run_test() -> QueryResult<()> {
 /// #     Ok(())
 /// # }
@@ -402,7 +402,7 @@ where
 /// let names = users.select(name).order(id).load::<String>(&conn);
 /// assert_eq!(Ok(vec!["Jim".into(), "Tess".into()]), names);
 /// # }
-/// # #[cfg(feature = "postgres")] fn main() {}
+/// # #[cfg(any(feature = "postgres", feature = "unstable_pure_rust_postgres"))] fn main() {}
 pub fn replace_into<T>(target: T) -> IncompleteInsertStatement<T, Replace> {
     IncompleteInsertStatement::new(target, Replace)
 }

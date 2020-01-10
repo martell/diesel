@@ -1,4 +1,8 @@
-#[cfg(any(feature = "postgres", feature = "mysql", feature = "postgres_pure_rust"))]
+#[cfg(any(
+    feature = "postgres",
+    feature = "mysql",
+    feature = "postgres_pure_rust"
+))]
 extern crate bigdecimal;
 extern crate chrono;
 

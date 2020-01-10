@@ -42,7 +42,7 @@ dotenv = ">=0.8, <0.11"
 quickcheck = "0.4"
 
 [features]
-default = ["with-deprecated", "32-column-tables"]
+default = ["with-deprecated", "32-column-tables", "postgres", "unstable_pure_rust_postgres"]
 extras = ["chrono", "serde_json", "uuid", "deprecated-time", "network-address", "numeric", "r2d2"]
 unstable = ["diesel_derives/nightly"]
 large-tables = ["32-column-tables"]

@@ -189,7 +189,7 @@ mod sqlite {
     }
 }
 
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 mod postgres {
     use super::chrono::*;
     use crate::schema::*;

@@ -1,5 +1,5 @@
 #![recursion_limit = "1024"]
-#![deny(warnings)]
+#![cfg_attr(any(feature = "postgres", feature = "postgres_pure_rust"), deny(warnings))]
 
 #[macro_use]
 extern crate assert_matches;
@@ -22,9 +22,9 @@ mod annotations;
 mod associations;
 mod boxed_queries;
 mod connection;
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 mod custom_schemas;
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 mod custom_types;
 mod debug;
 mod delete;

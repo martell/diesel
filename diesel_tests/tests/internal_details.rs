@@ -14,7 +14,7 @@ fn bind_params_are_passed_for_null_when_not_inserting() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn query_which_cannot_be_transmitted_gives_proper_error_message() {
     use crate::schema::comments::dsl::*;
     use diesel::result::DatabaseErrorKind::UnableToSendCommand;
@@ -36,7 +36,7 @@ fn query_which_cannot_be_transmitted_gives_proper_error_message() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn empty_query_gives_proper_error_instead_of_panicking() {
     use diesel::dsl::sql;
     use diesel::result::DatabaseErrorKind::__Unknown;

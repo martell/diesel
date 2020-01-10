@@ -20,7 +20,7 @@ fn unique_constraints_are_detected() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn unique_constraints_report_correct_constraint_name() {
     let connection = connection();
     connection
@@ -84,7 +84,7 @@ fn foreign_key_violation_detected() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn foreign_key_violation_correct_constraint_name() {
     let connection = connection();
 
@@ -105,7 +105,7 @@ fn foreign_key_violation_correct_constraint_name() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn isolation_errors_are_detected() {
     use diesel::result::DatabaseErrorKind::SerializationFailure;
     use diesel::result::Error::DatabaseError;

@@ -13,7 +13,7 @@ table! {
     }
 }
 
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 table! {
     has_timestamptzs {
         id -> Integer,
@@ -29,7 +29,7 @@ table! {
     }
 }
 
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 table! {
     nullable_date_and_time {
         id -> Integer,
@@ -40,7 +40,7 @@ table! {
     }
 }
 
-#[cfg(not(feature = "postgres"))]
+#[cfg(not(any(feature = "postgres", feature = "postgres_pure_rust")))]
 table! {
     nullable_date_and_time {
         id -> Integer,
@@ -51,7 +51,7 @@ table! {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn now_executes_sql_function_now() {
     use self::has_timestamps::dsl::*;
 
@@ -77,7 +77,7 @@ fn now_executes_sql_function_now() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 // FIXME: Replace this with an actual timestamptz expression
 fn now_can_be_used_as_timestamptz() {
     use self::has_timestamps::dsl::*;
@@ -101,7 +101,7 @@ fn now_can_be_used_as_timestamptz() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 // FIXME: Replace this with an actual timestamptz expression
 fn now_can_be_used_as_nullable_timestamptz() {
     use self::has_timestamps::dsl::*;
@@ -186,7 +186,7 @@ fn date_uses_sql_function_date() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn time_is_deserialized_properly() {
     use self::has_time::dsl::*;
 
@@ -209,7 +209,7 @@ fn time_is_deserialized_properly() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn interval_is_deserialized_properly() {
     use diesel::dsl::sql;
     let connection = connection();
@@ -234,7 +234,7 @@ fn interval_is_deserialized_properly() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn adding_interval_to_timestamp() {
     use self::has_timestamps::dsl::*;
     use diesel::dsl::sql;
@@ -259,7 +259,7 @@ fn adding_interval_to_timestamp() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn adding_interval_to_timestamptz() {
     use self::has_timestamptzs::dsl::*;
     use diesel::dsl::sql;
@@ -284,7 +284,7 @@ fn adding_interval_to_timestamptz() {
 }
 
 #[test]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 fn adding_interval_to_nullable_things() {
     use self::nullable_date_and_time::dsl::*;
     use diesel::dsl::sql;
@@ -350,7 +350,7 @@ fn setup_test_table(conn: &TestConnection) {
     .execute(conn)
     .unwrap();
 
-    #[cfg(feature = "postgres")]
+    #[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
     create_table(
         "has_timestamptzs",
         (
@@ -379,7 +379,7 @@ fn setup_test_table(conn: &TestConnection) {
         (
             integer("id").primary_key().auto_increment(),
             timestamp("timestamp"),
-            #[cfg(feature = "postgres")]
+            #[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
             timestamptz("timestamptz"),
             time("time"),
             date("date"),

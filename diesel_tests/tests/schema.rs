@@ -1,6 +1,9 @@
 use diesel::*;
 
-#[cfg(all(feature = "postgres", feature = "backend_specific_database_url"))]
+#[cfg(all(
+    any(feature = "postgres", feature = "postgres_pure_rust"),
+    feature = "backend_specific_database_url"
+))]
 infer_schema!("dotenv:PG_DATABASE_URL");
 #[cfg(all(feature = "sqlite", feature = "backend_specific_database_url"))]
 infer_schema!("dotenv:SQLITE_DATABASE_URL");
@@ -76,8 +79,8 @@ pub struct Following {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "postgres", path = "postgres_specific_schema.rs")]
-#[cfg_attr(not(feature = "postgres"), path = "backend_specifics.rs")]
+#[cfg_attr(any(feature = "postgres", feature = "postgres_pure_rust"), path = "postgres_specific_schema.rs")]
+#[cfg_attr(not(any(feature = "postgres", feature = "postgres_pure_rust")), path = "backend_specifics.rs")]
 mod backend_specifics;
 
 pub use self::backend_specifics::*;
@@ -158,6 +161,8 @@ pub struct Like {
 
 #[cfg(feature = "postgres")]
 pub type TestConnection = PgConnection;
+#[cfg(feature = "postgres_pure_rust")]
+pub type TestConnection = PostgresConnection;
 #[cfg(feature = "sqlite")]
 pub type TestConnection = SqliteConnection;
 #[cfg(feature = "mysql")]
@@ -187,12 +192,12 @@ pub fn connection() -> TestConnection {
     result
 }
 
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 pub fn connection_without_transaction() -> TestConnection {
     let connection_url = dotenv::var("PG_DATABASE_URL")
         .or_else(|_| dotenv::var("DATABASE_URL"))
         .expect("DATABASE_URL must be set in order to run tests");
-    PgConnection::establish(&connection_url).unwrap()
+    TestConnection::establish(&connection_url).unwrap()
 }
 
 #[cfg(feature = "sqlite")]
@@ -213,7 +218,7 @@ pub fn connection_without_transaction() -> TestConnection {
     MysqlConnection::establish(&connection_url).unwrap()
 }
 
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 pub fn disable_foreign_keys(connection: &TestConnection) {
     connection.execute("SET CONSTRAINTS ALL DEFERRED").unwrap();
 }
@@ -287,7 +292,7 @@ pub fn connection_with_nullable_table_data() -> TestConnection {
 }
 
 fn ensure_primary_key_seq_greater_than(x: i64, connection: &TestConnection) {
-    if cfg!(feature = "postgres") {
+    if cfg!(any(feature = "postgres", feature = "postgres_pure_rust")) {
         for _ in 0..x {
             select(nextval("users_id_seq")).execute(connection).unwrap();
         }

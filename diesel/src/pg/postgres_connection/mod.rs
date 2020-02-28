@@ -272,10 +272,10 @@ impl postgresql::types::ToSql for DieselToSqlWrapper {
         ty: &Type,
         out: &mut BytesMut,
     ) -> Result<postgresql::types::IsNull, Box<dyn Error + 'static + Send + Sync>> {
-        if !Self::accepts(ty) {
-            todo!("write a proper error message")
-        } else {
+        if Self::accepts(ty) {
             self.to_sql(ty, out)
+        } else {
+            todo!("write a proper error message")
         }
     }
 }

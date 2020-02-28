@@ -279,7 +279,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: 1.37.0
+            toolchain: 1.40.0
             profile: minimal
             components: clippy, rustfmt
             override: true
@@ -342,13 +342,13 @@ jobs:
           args: --manifest-path diesel_cli/Cargo.toml --no-default-features --features "sqlite-bundled"
 
   minimal_rust_version:
-    name: Check Minimal supported rust version (1.37.0)
+    name: Check Minimal supported rust version (1.40.0)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: 1.37.0
+            toolchain: 1.40.0
             profile: minimal
             override: true
       - name: Cache cargo registry
@@ -367,7 +367,7 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install libsqlite3-dev libpq-dev libmysqlclient-dev
 
-      - name: Check building with rust 1.36.0
+      - name: Check building with rust 1.40.0
         uses: actions-rs/cargo@v1
         with:
           command: check

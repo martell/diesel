@@ -23,5 +23,5 @@ fn main() {
     users::table.filter(exists(true));
     //~^ ERROR SelectQuery
     users::table.filter(exists(users::id));
-    //~^ ERROR Expression
+    //~^ ERROR E0277
 }

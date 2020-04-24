@@ -1,8 +1,9 @@
-use super::Expression;
+use super::functions::sql_function;
+use super::{Expression, ValidGrouping};
 use crate::backend::Backend;
 use crate::query_builder::*;
 use crate::result::QueryResult;
-use crate::sql_types::BigInt;
+use crate::sql_types::{BigInt, DieselNumericOps};
 
 sql_function! {
     /// Creates a SQL `COUNT` expression
@@ -14,7 +15,6 @@ sql_function! {
     /// # Examples
     ///
     /// ```rust
-    /// # #[macro_use] extern crate diesel;
     /// # include!("../doctest_setup.rs");
     /// # use diesel::dsl::*;
     /// #
@@ -41,7 +41,6 @@ sql_function! {
 /// # Examples
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
 /// # include!("../doctest_setup.rs");
 /// # use diesel::dsl::*;
 /// #
@@ -55,7 +54,8 @@ pub fn count_star() -> CountStar {
     CountStar
 }
 
-#[derive(Debug, Clone, Copy, QueryId, DieselNumericOps)]
+#[derive(Debug, Clone, Copy, QueryId, DieselNumericOps, ValidGrouping)]
+#[diesel(aggregate)]
 #[doc(hidden)]
 pub struct CountStar;
 

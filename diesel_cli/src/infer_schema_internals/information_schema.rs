@@ -3,7 +3,8 @@ use std::error::Error;
 
 use diesel::backend::Backend;
 use diesel::deserialize::FromSql;
-use diesel::expression::NonAggregate;
+use diesel::dsl::*;
+use diesel::expression::{is_aggregate, ValidGrouping};
 #[cfg(feature = "mysql")]
 use diesel::mysql::Mysql;
 #[cfg(feature = "postgres")]
@@ -11,19 +12,21 @@ use diesel::pg::Pg;
 use diesel::query_builder::{QueryFragment, QueryId};
 use diesel::*;
 
+use self::information_schema::{columns, key_column_usage, table_constraints, tables};
 use super::data_structures::*;
+use super::inference;
 use super::table_data::TableName;
 
 pub trait UsesInformationSchema: Backend {
     type TypeColumn: SelectableExpression<self::information_schema::columns::table, SqlType = sql_types::Text>
-        + NonAggregate
+        + ValidGrouping<(), IsAggregate = is_aggregate::No>
         + QueryId
         + QueryFragment<Self>;
 
     fn type_column() -> Self::TypeColumn;
     fn default_schema<C>(conn: &C) -> QueryResult<String>
     where
-        C: Connection,
+        C: Connection<Backend = Self>,
         String: FromSql<sql_types::Text, C::Backend>;
 }
 
@@ -50,7 +53,7 @@ impl UsesInformationSchema for Mysql {
 
     fn default_schema<C>(conn: &C) -> QueryResult<String>
     where
-        C: Connection,
+        C: Connection<Backend = Self>,
         String: FromSql<sql_types::Text, C::Backend>,
     {
         no_arg_sql_function!(database, sql_types::VarChar);
@@ -60,6 +63,8 @@ impl UsesInformationSchema for Mysql {
 
 #[allow(clippy::module_inception)]
 mod information_schema {
+    use diesel::prelude::{allow_tables_to_appear_in_same_query, table};
+
     table! {
         information_schema.tables (table_schema, table_name) {
             table_schema -> VarChar,
@@ -114,11 +119,31 @@ mod information_schema {
     allow_tables_to_appear_in_same_query!(key_column_usage, table_constraints);
 }
 
-pub fn get_table_data<Conn>(conn: &Conn, table: &TableName) -> QueryResult<Vec<ColumnInformation>>
+pub fn get_table_data<'a, Conn>(
+    conn: &Conn,
+    table: &'a TableName,
+) -> QueryResult<Vec<ColumnInformation>>
 where
     Conn: Connection,
     Conn::Backend: UsesInformationSchema,
     String: FromSql<sql_types::Text, Conn::Backend>,
+    Order<
+        Filter<
+            Filter<
+                Select<
+                    columns::table,
+                    (
+                        columns::column_name,
+                        <Conn::Backend as UsesInformationSchema>::TypeColumn,
+                        columns::is_nullable,
+                    ),
+                >,
+                Eq<columns::table_name, &'a String>,
+            >,
+            Eq<columns::table_schema, Cow<'a, String>>,
+        >,
+        columns::ordinal_position,
+    >: QueryFragment<Conn::Backend>,
 {
     use self::information_schema::columns::dsl::*;
 
@@ -130,20 +155,39 @@ where
     let type_column = Conn::Backend::type_column();
     columns
         .select((column_name, type_column, is_nullable))
-        .filter(table_name.eq(&table.name))
+        .filter(table_name.eq(&table.sql_name))
         .filter(table_schema.eq(schema_name))
         .order(ordinal_position)
         .load(conn)
 }
 
-pub fn get_primary_keys<Conn>(conn: &Conn, table: &TableName) -> QueryResult<Vec<String>>
+pub fn get_primary_keys<'a, Conn>(conn: &Conn, table: &'a TableName) -> QueryResult<Vec<String>>
 where
     Conn: Connection,
     Conn::Backend: UsesInformationSchema,
     String: FromSql<sql_types::Text, Conn::Backend>,
+    Order<
+        Filter<
+            Filter<
+                Filter<
+                    Select<key_column_usage::table, key_column_usage::column_name>,
+                    EqAny<
+                        key_column_usage::constraint_name,
+                        Filter<
+                            Select<table_constraints::table, table_constraints::constraint_name>,
+                            Eq<table_constraints::constraint_type, &'static str>,
+                        >,
+                    >,
+                >,
+                Eq<key_column_usage::table_name, &'a String>,
+            >,
+            Eq<key_column_usage::table_schema, Cow<'a, String>>,
+        >,
+        key_column_usage::ordinal_position,
+    >: QueryFragment<Conn::Backend>,
 {
     use self::information_schema::key_column_usage::dsl::*;
-    use self::information_schema::table_constraints::{self, constraint_type};
+    use self::information_schema::table_constraints::constraint_type;
 
     let pk_query = table_constraints::table
         .select(table_constraints::constraint_name)
@@ -157,25 +201,37 @@ where
     key_column_usage
         .select(column_name)
         .filter(constraint_name.eq_any(pk_query))
-        .filter(table_name.eq(&table.name))
+        .filter(table_name.eq(&table.sql_name))
         .filter(table_schema.eq(schema_name))
         .order(ordinal_position)
         .load(conn)
 }
 
-pub fn load_table_names<Conn>(
+pub fn load_table_names<'a, Conn>(
     connection: &Conn,
-    schema_name: Option<&str>,
+    schema_name: Option<&'a str>,
 ) -> Result<Vec<TableName>, Box<dyn Error>>
 where
     Conn: Connection,
     Conn::Backend: UsesInformationSchema,
     String: FromSql<sql_types::Text, Conn::Backend>,
+    Filter<
+        Filter<
+            Filter<
+                Select<tables::table, tables::table_name>,
+                Eq<tables::table_schema, Cow<'a, str>>,
+            >,
+            NotLike<tables::table_name, &'static str>,
+        >,
+        Like<tables::table_type, &'static str>,
+    >: QueryFragment<Conn::Backend>,
 {
     use self::information_schema::tables::dsl::*;
 
     let default_schema = Conn::Backend::default_schema(connection)?;
-    let db_schema_name = schema_name.unwrap_or(&default_schema);
+    let db_schema_name = schema_name
+        .map(Cow::Borrowed)
+        .unwrap_or_else(|| Cow::Owned(default_schema.clone()));
 
     let mut table_names = tables
         .select(table_name)
@@ -187,7 +243,8 @@ where
     Ok(table_names
         .into_iter()
         .map(|name| TableName {
-            name,
+            rust_name: inference::rust_name_for_sql_name(&name),
+            sql_name: name,
             schema: schema_name
                 .filter(|&schema| schema != default_schema)
                 .map(|schema| schema.to_owned()),
@@ -197,20 +254,15 @@ where
 
 #[allow(clippy::similar_names)]
 #[cfg(feature = "postgres")]
-pub fn load_foreign_key_constraints<Conn>(
-    connection: &Conn,
-    schema_name: Option<&str>,
-) -> QueryResult<Vec<ForeignKeyConstraint>>
-where
-    Conn: Connection,
-    Conn::Backend: UsesInformationSchema,
-    String: FromSql<sql_types::Text, Conn::Backend>,
-{
+pub fn load_foreign_key_constraints<'a>(
+    connection: &PgConnection,
+    schema_name: Option<&'a str>,
+) -> QueryResult<Vec<ForeignKeyConstraint>> {
     use self::information_schema::key_column_usage as kcu;
     use self::information_schema::referential_constraints as rc;
     use self::information_schema::table_constraints as tc;
 
-    let default_schema = Conn::Backend::default_schema(connection)?;
+    let default_schema = Pg::default_schema(connection)?;
     let schema_name = schema_name.unwrap_or(&default_schema);
 
     let constraint_names = tc::table

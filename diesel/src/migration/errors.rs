@@ -11,9 +11,10 @@ use crate::result;
 
 /// Errors that occur while preparing to run migrations
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum MigrationError {
     /// The migration directory wasn't found
-    MigrationDirectoryNotFound,
+    MigrationDirectoryNotFound(PathBuf),
     /// Provided migration was in an unknown format
     UnknownMigrationFormat(PathBuf),
     /// General system IO error
@@ -22,36 +23,33 @@ pub enum MigrationError {
     UnknownMigrationVersion(String),
     /// No migrations had to be/ could be run
     NoMigrationRun,
-    ///
-    #[doc(hidden)]
-    __NonExhaustive,
 }
 
-impl Error for MigrationError {
-    fn description(&self) -> &str {
-        match *self {
-            MigrationError::MigrationDirectoryNotFound => {
-                "Unable to find migrations directory in this directory or any parent directories."
-            }
-            MigrationError::UnknownMigrationFormat(_) => {
-                "Invalid migration directory, the directory's name should be \
-                 <timestamp>_<name_of_migration>, and it should only contain up.sql and down.sql."
-            }
-            MigrationError::IoError(ref error) => error.description(),
-            MigrationError::UnknownMigrationVersion(_) => {
-                "Unable to find migration version to revert in the migrations directory."
-            }
-            MigrationError::NoMigrationRun => {
-                "No migrations have been run. Did you forget `diesel migration run`?"
-            }
-            MigrationError::__NonExhaustive => unreachable!(),
-        }
-    }
-}
+impl Error for MigrationError {}
 
 impl fmt::Display for MigrationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        self.description().fmt(f)
+        match *self {
+            MigrationError::MigrationDirectoryNotFound(ref p) => write!(
+                f,
+                "Unable to find migrations directory in {:?} or any parent directories.",
+                p
+            ),
+            MigrationError::UnknownMigrationFormat(_) => write!(
+                f,
+                "Invalid migration directory, the directory's name should be \
+                 <timestamp>_<name_of_migration>, and it should only contain up.sql and down.sql."
+            ),
+            MigrationError::IoError(ref error) => write!(f, "{}", error),
+            MigrationError::UnknownMigrationVersion(_) => write!(
+                f,
+                "Unable to find migration version to revert in the migrations directory."
+            ),
+            MigrationError::NoMigrationRun => write!(
+                f,
+                "No migrations have been run. Did you forget `diesel migration run`?"
+            ),
+        }
     }
 }
 
@@ -59,8 +57,8 @@ impl PartialEq for MigrationError {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (
-                &MigrationError::MigrationDirectoryNotFound,
-                &MigrationError::MigrationDirectoryNotFound,
+                &MigrationError::MigrationDirectoryNotFound(_),
+                &MigrationError::MigrationDirectoryNotFound(_),
             ) => true,
             (
                 &MigrationError::UnknownMigrationFormat(ref p1),
@@ -80,6 +78,7 @@ impl From<io::Error> for MigrationError {
 /// Errors that occur while running migrations
 #[derive(Debug, PartialEq)]
 #[allow(clippy::enum_variant_names)]
+#[non_exhaustive]
 pub enum RunMigrationsError {
     /// A general migration error occured
     MigrationError(MigrationError),
@@ -87,25 +86,19 @@ pub enum RunMigrationsError {
     QueryError(result::Error),
     /// The provided migration was empty
     EmptyMigration,
-    ///
-    #[doc(hidden)]
-    __NonExhaustive,
 }
 
-impl Error for RunMigrationsError {
-    fn description(&self) -> &str {
-        match *self {
-            RunMigrationsError::MigrationError(ref error) => error.description(),
-            RunMigrationsError::QueryError(ref error) => error.description(),
-            RunMigrationsError::EmptyMigration => "Attempted to run an empty migration.",
-            RunMigrationsError::__NonExhaustive => unreachable!(),
-        }
-    }
-}
+impl Error for RunMigrationsError {}
 
 impl fmt::Display for RunMigrationsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "Failed with: {}", self.description())
+        match *self {
+            RunMigrationsError::MigrationError(ref error) => write!(f, "Failed with: {}", error),
+            RunMigrationsError::QueryError(ref error) => write!(f, "Failed with: {}", error),
+            RunMigrationsError::EmptyMigration => {
+                write!(f, "Failed with: Attempted to run an empty migration.")
+            }
+        }
     }
 }
 

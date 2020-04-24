@@ -1,23 +1,14 @@
 use diesel::*;
-use dotenv::dotenv;
-use std::env;
 
-#[cfg(all(
-    any(feature = "postgres", feature = "postgres_pure_rust"),
-    feature = "backend_specific_database_url"
-))]
-infer_schema!("dotenv:PG_DATABASE_URL");
-#[cfg(all(feature = "sqlite", feature = "backend_specific_database_url"))]
-infer_schema!("dotenv:SQLITE_DATABASE_URL");
-#[cfg(all(feature = "mysql", feature = "backend_specific_database_url"))]
-infer_schema!("dotenv:MYSQL_DATABASE_URL");
-#[cfg(not(feature = "backend_specific_database_url"))]
-infer_schema!("dotenv:DATABASE_URL");
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
+mod custom_schemas;
 
+#[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
+include!("pg_schema.rs");
 #[cfg(feature = "sqlite")]
-mod test_infer_schema_works_on_empty_database {
-    infer_schema!(":memory:");
-}
+include!("sqlite_schema.rs");
+#[cfg(feature = "mysql")]
+include!("mysql_schema.rs");
 
 #[derive(
     PartialEq, Eq, Debug, Clone, Queryable, Identifiable, Insertable, AsChangeset, QueryableByName,
@@ -196,9 +187,8 @@ pub fn connection() -> TestConnection {
 
 #[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 pub fn connection_without_transaction() -> TestConnection {
-    dotenv().ok();
-    let connection_url = env::var("PG_DATABASE_URL")
-        .or_else(|_| env::var("DATABASE_URL"))
+    let connection_url = dotenv::var("PG_DATABASE_URL")
+        .or_else(|_| dotenv::var("DATABASE_URL"))
         .expect("DATABASE_URL must be set in order to run tests");
     TestConnection::establish(&connection_url).unwrap()
 }
@@ -215,9 +205,8 @@ pub fn connection_without_transaction() -> TestConnection {
 
 #[cfg(feature = "mysql")]
 pub fn connection_without_transaction() -> TestConnection {
-    dotenv().ok();
-    let connection_url = env::var("MYSQL_DATABASE_URL")
-        .or_else(|_| env::var("DATABASE_URL"))
+    let connection_url = dotenv::var("MYSQL_DATABASE_URL")
+        .or_else(|_| dotenv::var("DATABASE_URL"))
         .expect("DATABASE_URL must be set in order to run tests");
     MysqlConnection::establish(&connection_url).unwrap()
 }
@@ -246,7 +235,7 @@ pub fn drop_table_cascade(connection: &TestConnection, table: &str) {
         .unwrap();
 }
 
-#[cfg(not(feature = "sqlite"))]
+#[cfg(feature = "postgres")]
 pub fn drop_table_cascade(connection: &TestConnection, table: &str) {
     connection
         .execute(&format!("DROP TABLE {} CASCADE", table))

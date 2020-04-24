@@ -19,13 +19,14 @@ mod ranges;
 mod record;
 #[cfg(feature = "uuid")]
 mod uuid;
-#[cfg(feature = "uuidv07")]
-mod uuid_v0_7;
 
 /// PostgreSQL specific SQL types
 ///
 /// Note: All types in this module can be accessed through `diesel::sql_types`
 pub mod sql_types {
+    use crate::query_builder::QueryId;
+    use crate::sql_types::SqlType;
+
     /// The `OID` SQL type. This is a PostgreSQL specific type.
     ///
     /// ### [`ToSql`] impls
@@ -183,7 +184,7 @@ pub mod sql_types {
     ///
     /// [`ToSql`]: ../../../serialize/trait.ToSql.html
     /// [`FromSql`]: ../../../deserialize/trait.FromSql.html
-    /// [Uuid]: https://doc.rust-lang.org/uuid/uuid/struct.Uuid.html
+    /// [Uuid]: https://docs.rs/uuid/*/uuid/struct.Uuid.html
     #[derive(Debug, Clone, Copy, Default, QueryId, SqlType)]
     #[postgres(oid = "2950", array_oid = "2951")]
     pub struct Uuid;
@@ -253,7 +254,6 @@ pub mod sql_types {
     ///
     /// ```rust
     /// # #![allow(dead_code)]
-    /// # #[macro_use] extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// #
     /// table! {
@@ -311,7 +311,6 @@ pub mod sql_types {
     /// # Examples
     ///
     /// ```rust
-    /// # #[macro_use] extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// use diesel::data_types::Cents;
     ///
@@ -359,7 +358,6 @@ pub mod sql_types {
     /// # Examples
     ///
     /// ```rust
-    /// # #[macro_use] extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// table! {
     ///     devices {
@@ -409,7 +407,6 @@ pub mod sql_types {
     /// # Examples
     ///
     /// ```rust
-    /// # #[macro_use] extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// #
     /// table! {
@@ -464,7 +461,6 @@ pub mod sql_types {
     ///
     /// ```rust
     /// # #![allow(dead_code)]
-    /// # #[macro_use] extern crate diesel;
     /// # include!("../../doctest_setup.rs");
     /// table! {
     ///     clients {

@@ -3,7 +3,7 @@ use diesel::*;
 
 #[test]
 fn simple_distinct() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection();
     connection
@@ -20,7 +20,7 @@ fn simple_distinct() {
 #[cfg(any(feature = "postgres", feature = "postgres_pure_rust"))]
 #[test]
 fn distinct_on() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection();
     connection

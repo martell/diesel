@@ -6,18 +6,19 @@
 extern crate bigdecimal;
 extern crate chrono;
 
-use self::chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use self::chrono::*;
 pub use quickcheck::quickcheck;
 
+pub use crate::schema::{connection_without_transaction, TestConnection};
 pub use diesel::data_types::*;
 pub use diesel::result::Error;
 pub use diesel::serialize::ToSql;
 pub use diesel::sql_types::HasSqlType;
 pub use diesel::*;
-pub use schema::{connection_without_transaction, TestConnection};
 
-use diesel::expression::AsExpression;
+use diesel::expression::{AsExpression, NonAggregate};
 use diesel::query_builder::{QueryFragment, QueryId};
+#[cfg(feature = "postgres")]
 use std::collections::Bound;
 
 thread_local! {
@@ -34,6 +35,7 @@ where
         + Clone
         + ::std::fmt::Debug,
     <T as AsExpression<ST>>::Expression: SelectableExpression<(), SqlType = ST>
+        + NonAggregate
         + QueryFragment<<TestConnection as Connection>::Backend>
         + QueryId,
 {
@@ -266,6 +268,10 @@ mod pg_types {
         let tstz2 = mk_datetime((data.2, data.3));
         mk_bounds((tstz1, tstz2))
     }
+
+    pub fn mk_datetime(data: (i64, u32)) -> DateTime<Utc> {
+        DateTime::from_utc(mk_naive_datetime(data), Utc)
+    }
 }
 
 #[cfg(feature = "mysql")]
@@ -301,6 +307,7 @@ pub fn mk_naive_time(data: (u32, u32)) -> NaiveTime {
     NaiveTime::from_num_seconds_from_midnight(data.0, data.1 / 1000)
 }
 
+<<<<<<< HEAD
 pub fn mk_datetime(data: (i64, u32)) -> DateTime<Utc> {
     DateTime::from_utc(mk_naive_datetime(data), Utc)
 }
@@ -310,6 +317,9 @@ pub fn mk_datetime(data: (i64, u32)) -> DateTime<Utc> {
     feature = "mysql",
     feature = "postgres_pure_rust"
 ))]
+=======
+#[cfg(any(feature = "postgres", feature = "mysql"))]
+>>>>>>> origin/master
 fn mk_bigdecimal(data: (i64, u64)) -> bigdecimal::BigDecimal {
     format!("{}.{}", data.0, data.1)
         .parse()

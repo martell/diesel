@@ -1,11 +1,10 @@
 use super::schema::*;
-use diesel::connection::SimpleConnection;
+use crate::schema_dsl::*;
 use diesel::*;
-use schema_dsl::*;
 
 #[test]
 fn selecting_basic_data() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection();
     connection
@@ -22,7 +21,7 @@ fn selecting_basic_data() {
 
 #[test]
 fn selecting_a_struct() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
     let connection = connection();
     connection
         .execute("INSERT INTO users (name) VALUES ('Sean'), ('Tess')")
@@ -35,7 +34,7 @@ fn selecting_a_struct() {
 
 #[test]
 fn with_safe_select() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection();
     connection
@@ -71,7 +70,7 @@ fn with_select_sql() {
 
 #[test]
 fn selecting_nullable_followed_by_non_null() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection();
     connection
@@ -87,7 +86,7 @@ fn selecting_nullable_followed_by_non_null() {
 
 #[test]
 fn selecting_expression_with_bind_param() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection();
     connection
@@ -163,7 +162,7 @@ fn selecting_columns_with_different_definition_order() {
 
 #[test]
 fn selection_using_subselect() {
-    use schema::posts::dsl::*;
+    use crate::schema::posts::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
     let ids: Vec<i32> = users::table.select(users::id).load(&connection).unwrap();
@@ -220,6 +219,7 @@ table! {
 #[test]
 fn select_for_update_locks_selected_rows() {
     use self::users_select_for_update::dsl::*;
+    use diesel::connection::SimpleConnection;
     use std::mem::drop;
     use std::sync::mpsc;
     use std::thread;
@@ -496,4 +496,19 @@ fn select_can_be_called_on_query_that_is_valid_subselect_but_invalid_query() {
         .load(&connection);
 
     assert_eq!(Ok(vec![tess]), users_with_post_using_name_as_title);
+}
+
+#[test]
+fn selecting_multiple_aggregate_expressions_without_group_by() {
+    use self::users::dsl::*;
+    use diesel::dsl::{count_star, max};
+
+    let connection = connection_with_sean_and_tess_in_users_table();
+    let (count, max_name) = users
+        .select((count_star(), max(name)))
+        .get_result::<(i64, _)>(&connection)
+        .unwrap();
+
+    assert_eq!(2, count);
+    assert_eq!(Some(String::from("Tess")), max_name);
 }

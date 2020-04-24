@@ -66,12 +66,12 @@ pub(crate) fn expand(input: SqlFunctionDecl) -> Result<TokenStream, Diagnostic> 
     let args_iter = args.iter();
     let mut tokens = quote! {
         use diesel::{self, QueryResult};
-        use diesel::expression::{AsExpression, Expression, SelectableExpression, AppearsOnTable};
+        use diesel::expression::{AsExpression, Expression, SelectableExpression, AppearsOnTable, ValidGrouping};
         use diesel::query_builder::{QueryFragment, AstPass};
         use diesel::sql_types::*;
         use super::*;
 
-        #[derive(Debug, Clone, Copy, QueryId, DieselNumericOps)]
+        #[derive(Debug, Clone, Copy, diesel::query_builder::QueryId, diesel::sql_types::DieselNumericOps)]
         pub struct #fn_name #ty_generics {
             #(pub(in super) #args_iter,)*
             #(pub(in super) #type_args: ::std::marker::PhantomData<#type_args>,)*
@@ -123,15 +123,29 @@ pub(crate) fn expand(input: SqlFunctionDecl) -> Result<TokenStream, Diagnostic> 
         }
     };
 
-    if !is_aggregate {
+    if is_aggregate {
         tokens = quote! {
             #tokens
 
-            impl #impl_generics diesel::expression::NonAggregate
+            impl #impl_generics_internal ValidGrouping<__DieselInternal>
                 for #fn_name #ty_generics
-            #where_clause
-                #(#arg_name: diesel::expression::NonAggregate,)*
             {
+                type IsAggregate = diesel::expression::is_aggregate::Yes;
+            }
+        }
+    } else {
+        tokens = quote! {
+            #tokens
+
+            #[derive(ValidGrouping)]
+            pub struct __Derived<#(#arg_name,)*>(#(#arg_name,)*);
+
+            impl #impl_generics_internal ValidGrouping<__DieselInternal>
+                for #fn_name #ty_generics
+            where
+                __Derived<#(#arg_name,)*>: ValidGrouping<__DieselInternal>,
+            {
+                type IsAggregate = <__Derived<#(#arg_name,)*> as ValidGrouping<__DieselInternal>>::IsAggregate;
             }
         };
 

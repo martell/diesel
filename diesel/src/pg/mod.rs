@@ -6,7 +6,6 @@
 
 pub mod expression;
 pub mod types;
-pub mod upsert;
 
 mod backend;
 #[cfg(feature = "postgres")]
@@ -14,7 +13,7 @@ mod connection;
 mod metadata_lookup;
 #[cfg(feature = "unstable_pure_rust_postgres")]
 mod postgres_connection;
-mod query_builder;
+pub(crate) mod query_builder;
 pub(crate) mod serialize;
 mod transaction;
 mod value;
@@ -29,6 +28,10 @@ pub use self::query_builder::DistinctOnClause;
 pub use self::query_builder::PgQueryBuilder;
 pub use self::transaction::TransactionBuilder;
 pub use self::value::PgValue;
+#[doc(hidden)]
+#[cfg(feature = "with-deprecated")]
+#[deprecated(since = "2.0.0", note = "Use `diesel::upsert` instead")]
+pub use crate::upsert;
 
 /// Data structures for PG types which have no corresponding Rust type
 ///

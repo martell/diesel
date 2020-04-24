@@ -1,9 +1,9 @@
+use crate::schema::*;
 use diesel::*;
-use schema::*;
 
 #[test]
 fn adding_literal_to_column() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
 
@@ -19,7 +19,7 @@ fn adding_literal_to_column() {
 #[test]
 #[cfg(not(feature = "sqlite"))] // FIXME: Does SQLite provide a way to detect overflow?
 fn overflow_returns_an_error_but_does_not_panic() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
     let query_result = users.select(id + i32::max_value()).load::<i32>(&connection);
@@ -31,7 +31,7 @@ fn overflow_returns_an_error_but_does_not_panic() {
 
 #[test]
 fn adding_column_to_column() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
 
@@ -42,7 +42,7 @@ fn adding_column_to_column() {
 
 #[test]
 fn adding_multiple_times() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
 
@@ -53,7 +53,7 @@ fn adding_multiple_times() {
 
 #[test]
 fn subtracting_literal_from_column() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
 
@@ -64,7 +64,7 @@ fn subtracting_literal_from_column() {
 
 #[test]
 fn adding_then_subtracting() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
 
@@ -75,7 +75,7 @@ fn adding_then_subtracting() {
 
 #[test]
 fn multiplying_column() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
 
@@ -86,7 +86,7 @@ fn multiplying_column() {
 
 #[test]
 fn dividing_column() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
 
@@ -97,7 +97,7 @@ fn dividing_column() {
 
 #[test]
 fn test_adding_nullables() {
-    use schema::nullable_table::dsl::*;
+    use crate::schema::nullable_table::dsl::*;
     let connection = connection_with_nullable_table_data();
 
     let expected_data = vec![None, None, Some(2), Some(3), Some(2)];
@@ -117,7 +117,7 @@ fn test_adding_nullables() {
 
 #[test]
 fn test_subtracting_nullables() {
-    use schema::nullable_table::dsl::*;
+    use crate::schema::nullable_table::dsl::*;
     let connection = connection_with_nullable_table_data();
 
     let expected_data = vec![None, None, Some(0), Some(1), Some(0)];
@@ -137,7 +137,7 @@ fn test_subtracting_nullables() {
 
 #[test]
 fn test_multiplying_nullables() {
-    use schema::nullable_table::dsl::*;
+    use crate::schema::nullable_table::dsl::*;
     let connection = connection_with_nullable_table_data();
 
     let expected_data = vec![None, None, Some(3), Some(6), Some(3)];
@@ -157,7 +157,7 @@ fn test_multiplying_nullables() {
 
 #[test]
 fn test_dividing_nullables() {
-    use schema::nullable_table::dsl::*;
+    use crate::schema::nullable_table::dsl::*;
     let connection = connection_with_nullable_table_data();
 
     let expected_data = vec![None, None, Some(0), Some(1), Some(0)];
@@ -177,7 +177,7 @@ fn test_dividing_nullables() {
 
 #[test]
 fn mix_and_match_all_numeric_ops() {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let connection = connection_with_sean_and_tess_in_users_table();
     connection
@@ -198,4 +198,90 @@ fn precedence_with_parens_is_maintained() {
 
     let x = select((2.into_sql::<Integer>() + 3) * 4).get_result::<i32>(&connection());
     assert_eq!(Ok(20), x);
+}
+
+#[test]
+#[cfg(feature = "mysql")]
+fn test_adding_unsigned() {
+    use crate::schema::unsigned_table::dsl::*;
+    let connection = connection();
+    connection
+        .execute("INSERT INTO unsigned_table VALUES (1,1), (2,2)")
+        .unwrap();
+
+    let expected_data = vec![2, 3];
+    let data = unsigned_table.select(value + 1).load(&connection);
+    assert_eq!(Ok(expected_data), data);
+
+    let expected_data = vec![2, 4];
+    let data = unsigned_table.select(value + value).load(&connection);
+    assert_eq!(Ok(expected_data), data);
+}
+
+#[test]
+#[cfg(feature = "mysql")]
+fn test_subtracting_unsigned() {
+    use crate::schema::unsigned_table::dsl::*;
+    let connection = connection();
+    connection
+        .execute("INSERT INTO unsigned_table VALUES (1,1), (2,2)")
+        .unwrap();
+
+    let expected_data = vec![0, 1];
+    let data = unsigned_table.select(value - 1).load(&connection);
+    assert_eq!(Ok(expected_data), data);
+
+    let expected_data = vec![0, 0];
+    let data = unsigned_table.select(value - value).load(&connection);
+    assert_eq!(Ok(expected_data), data);
+}
+
+#[test]
+#[cfg(feature = "mysql")]
+fn test_multiplying_unsigned() {
+    use crate::schema::unsigned_table::dsl::*;
+    let connection = connection();
+    connection
+        .execute("INSERT INTO unsigned_table VALUES (1,1), (2,2)")
+        .unwrap();
+
+    let expected_data = vec![1, 2];
+    let data = unsigned_table.select(value * 1).load(&connection);
+    assert_eq!(Ok(expected_data), data);
+
+    let expected_data = vec![1, 4];
+    let data = unsigned_table.select(value * value).load(&connection);
+    assert_eq!(Ok(expected_data), data);
+}
+
+#[test]
+#[cfg(feature = "mysql")]
+fn test_dividing_unsigned() {
+    use crate::schema::unsigned_table::dsl::*;
+    let connection = connection();
+    connection
+        .execute("INSERT INTO unsigned_table VALUES (1,1), (2,2)")
+        .unwrap();
+
+    let expected_data = vec![1, 2];
+    let data = unsigned_table.select(value / 1).load(&connection);
+    assert_eq!(Ok(expected_data), data);
+
+    let expected_data = vec![1, 1];
+    let data = unsigned_table.select(value / value).load(&connection);
+    assert_eq!(Ok(expected_data), data);
+}
+
+#[test]
+#[cfg(feature = "mysql")]
+fn test_multiple_unsigned() {
+    use crate::schema::unsigned_table::dsl::*;
+    let connection = connection();
+    connection
+        .execute("INSERT INTO unsigned_table VALUES (1,1), (2,2)")
+        .unwrap();
+
+    let expected_data = vec![1, 1];
+    let data = unsigned_table.select(value / id).load(&connection);
+    assert_eq!(Ok(expected_data), data);
 }

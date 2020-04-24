@@ -203,6 +203,8 @@ fn database_url_from_env(backend_specific_env_var: &str) -> String {
 }
 
 mod schema {
+    use diesel::prelude::*;
+
     table! {
         animals {
             id -> Integer,

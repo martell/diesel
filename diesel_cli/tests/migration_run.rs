@@ -1,8 +1,8 @@
+use crate::support::{database, project};
 use diesel::dsl::sql;
 use diesel::sql_types::Bool;
 use diesel::{select, RunQueryDsl};
 use std::path::Path;
-use support::{database, project};
 
 #[test]
 fn migration_run_runs_pending_migrations() {
@@ -502,7 +502,8 @@ fn verify_schema_errors_if_schema_file_would_change() {
     assert!(
         result
             .stderr()
-            .contains("Command would result in changes to src/my_schema.rs"),
+            .contains("Command would result in changes to")
+            && result.stderr().contains("src/my_schema.rs"),
         "Unexpected stderr {}",
         result.stderr()
     );

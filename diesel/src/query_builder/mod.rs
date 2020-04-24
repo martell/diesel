@@ -18,17 +18,19 @@ mod distinct_clause;
 pub mod functions;
 mod group_by_clause;
 mod insert_statement;
-mod limit_clause;
+pub(crate) mod limit_clause;
+pub(crate) mod limit_offset_clause;
 pub(crate) mod locking_clause;
 #[doc(hidden)]
 pub mod nodes;
-mod offset_clause;
+pub(crate) mod offset_clause;
 mod order_clause;
 mod returning_clause;
 mod select_clause;
 mod select_statement;
 mod sql_query;
 mod update_statement;
+pub(crate) mod upsert;
 mod where_clause;
 
 pub use self::ast_pass::AstPass;
@@ -47,6 +49,10 @@ pub use self::sql_query::{BoxedSqlQuery, SqlQuery};
 pub use self::update_statement::{
     AsChangeset, BoxedUpdateStatement, IntoUpdateTarget, UpdateStatement, UpdateTarget,
 };
+
+pub use self::limit_clause::{LimitClause, NoLimitClause};
+pub use self::limit_offset_clause::{BoxedLimitOffsetClause, LimitOffsetClause};
+pub use self::offset_clause::{NoOffsetClause, OffsetClause};
 
 pub(crate) use self::insert_statement::ColumnList;
 
@@ -230,6 +236,17 @@ where
     }
 }
 
+/// A trait used to construct type erased boxed variant of the current query node
+///
+/// Mainly useful for implementing third party backends
+pub trait IntoBoxedClause<'a, DB> {
+    /// Resulting type
+    type BoxedClause;
+
+    /// Convert the given query node in it's boxed representation
+    fn into_boxed(self) -> Self::BoxedClause;
+}
+
 /// Types that can be converted into a complete, typed SQL query.
 ///
 /// This is used internally to automatically add the right select clause when
@@ -272,7 +289,6 @@ impl<T: Query> AsQuery for T {
 /// ```rust
 /// # include!("../doctest_setup.rs");
 /// #
-/// # #[macro_use] extern crate diesel;
 /// # use diesel::*;
 /// # use schema::*;
 /// #

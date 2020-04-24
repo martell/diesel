@@ -1,5 +1,5 @@
 use crate::expression::subselect::Subselect;
-use crate::expression::{AsExpression, Expression};
+use crate::expression::{AsExpression, Expression, ValidGrouping};
 use crate::pg::Pg;
 use crate::query_builder::*;
 use crate::result::QueryResult;
@@ -14,7 +14,6 @@ use crate::sql_types::Array;
 /// # Example
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
 /// # include!("../../doctest_setup.rs");
 /// # use diesel::dsl::*;
 /// #
@@ -43,7 +42,6 @@ where
 /// # Example
 ///
 /// ```rust
-/// # #[macro_use] extern crate diesel;
 /// # include!("../../doctest_setup.rs");
 /// # use diesel::dsl::*;
 /// #
@@ -64,7 +62,7 @@ where
 }
 
 #[doc(hidden)]
-#[derive(Debug, Copy, Clone, QueryId, NonAggregate)]
+#[derive(Debug, Copy, Clone, QueryId, ValidGrouping)]
 pub struct Any<Expr> {
     expr: Expr,
 }
@@ -97,7 +95,7 @@ where
 impl_selectable_expression!(Any<Expr>);
 
 #[doc(hidden)]
-#[derive(Debug, Copy, Clone, QueryId, NonAggregate)]
+#[derive(Debug, Copy, Clone, QueryId, ValidGrouping)]
 pub struct All<Expr> {
     expr: Expr,
 }

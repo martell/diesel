@@ -8,8 +8,6 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ### Added
 
-* `NonAggregate` can now be derived for simple cases.
-
 * `Connection` and `SimpleConnection` traits are implemented for a broader range
   of `r2d2::PooledConnection<M>` types when the `r2d2` feature is enabled.
 
@@ -27,11 +25,25 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 * The `MacAddr` SQL type can now be used without enabling the `network-address`
   feature.
 
-* A unstable pure rust postgresql connection implementation (`PostgresConnection`) was added behind the `unstable_pure_rust_postgres` feature flag. It is based on the `postgres` crate
+* Added support for SQLite's `UPSERT`.
+  You can use this feature above SQLite version 3.24.0.
+
+* Multiple aggregate expressions can now appear together in the same select
+  clause. See [the upgrade notes](#2-0-0-upgrade-non-aggregate) for details.
+
+* `ValidGrouping` has been added to represent whether an expression is valid for
+  a given group by clause, and whether or not it's aggregate. It replaces the
+  functionality of `NonAggregate`. See [the upgrade
+  notes](#2-0-0-upgrade-non-aggregate) for details.
+
+* A unstable pure rust postgresql connection implementation (`PostgresConnection`) was
+  added behind the `unstable_pure_rust_postgres` feature flag.
+  It is based on the `postgres` crate
 
 ### Removed
 
 * All previously deprecated items have been removed.
+* Support for uuid version < 0.7.0 has been removed.
 
 ### Changed
 
@@ -49,7 +61,7 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
   `Mysql::TypeMetadata`, you will need to take the new struct
   `MysqlTypeMetadata` instead.
 
-* The minimal officially supported rustc version is now 1.37.0
+* The minimal officially supported rustc version is now 1.40.0
 
 * The `RawValue` types for the `Mysql` and `Postgresql` backend where changed
   from `[u8]` to distinct opaque types. If you used the concrete `RawValue` type
@@ -57,11 +69,41 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
   For the postgres backend additionally type information where added to the `RawValue`
   type. This allows to dynamically deserialize `RawValues` in container types.
 
+* The uuidv07 feature was renamed to uuid, due to the removal of support for older uuid versions
+
+* Boxed queries (constructed from `.into_boxed()`) are now `Send`.
+
+* The handling of mixed aggregate values is more robust. Invalid queries such as
+  `.select(max(id) + other_column)` are now correctly rejected, and valid
+  queries such as `.select((count_star(), max(other_column)))` are now correctly
+  accepted. For more details, see [the upgrade notes](#2-0-0-upgrade-non-aggregate).
+
+* `NonAggregate` is now a trait alias for `ValidGrouping<()>` for expressions
+  that are not aggregate. On stable this is a normal trait with a blanket impl,
+  but it should never be implemented directly. With the `unstable` feature, it
+  will use trait aliases which prevent manual implementations.
+
+  Due to language limitations, we cannot make the new trait alias by itself
+  represent everything it used to, so in some rare cases code changes may be
+  required. See [the upgrade notes](#2-0-0-upgrade-non-aggregate) for details.
+
+* Various `__NonExhaustive` variants in different (error-) enums are replaced with
+  `#[non_exhaustive]`. If you matched on one of those variants explicitly you need to
+  introduce a wild card match instead.
+
 ### Fixed
 
 * Many types were incorrectly considered non-aggregate when they should not
   have been. All types in Diesel are now correctly only considered
   non-aggregate if their parts are.
+
+* Offset clauses without limit clauses resulted into invalid sql using the mysql or
+  sqlite backend. Both do not support such clauses without a preceding limit clause.
+  For those backend Diesel does now generate a fake limit clause in case no explicit
+  limit clause was given. As consequence of this change generic query code may
+  require additional trait bounds as requested from the compiler. Third party
+  backends are required to explicitly provide `QueryFragment` impls for
+  `LimitOffsetClause<L, O>` now.
 
 * Nullability requirements are now properly enforced for nested joins.
   Previously, only the rules for the outer-most join were considered. For
@@ -69,15 +111,74 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
   any columns from `posts`. That will now fail to compile, and any selections
   from `posts` will need to be made explicitly nullable.
 
+* Diesel CLI will now look for `diesel.toml` to determine the project root
+  before looking for `Cargo.toml`.
+
+* Any relative paths in `diesel.toml` will now be treated as relative to the
+  project root (the directory containing either `diesel.toml` or `Cargo.toml`).
+  They are no longer dependent on the current working directory (for all
+  directories in the same project)
+
 ### Deprecated
 
 * `diesel_(prefix|postfix|infix)_operator!` have been deprecated. These macros
   are now available without the `diesel_` prefix. With Rust 2018 they can be
   invoked as `diesel::infix_operator!` instead.
 
+* `diesel::pg::upsert` has been deprecated to support upsert queries on more than one backend.
+  Please use `diesel::upsert` instead.
 
+
+### Upgrade Notes
+
+#### Replacement of `NonAggregate` with `ValidGrouping`
+<a name="2-0-0-upgrade-non-aggregate"></a>
+
+FIXME: This should probably be on the website, but I wanted to document it in
+the PR adding the changes.
+
+Key points:
+
+- Rules for aggregation are now correctly enforced. They match the semantics of
+  PG or MySQL with `ONLY_FULL_GROUP_BY` enabled.
+  - As before, `sql` is the escape hatch if needed.
+  - MySQL users can use `ANY_VALUE`, PG users can use `DISTINCT ON`. Also
+    consider using max/min/etc to get deterministic values.
+- Any `impl NonAggregate` must be replaced with `impl ValidGrouping`
+- For most code, `T: NonAggregate` should continue to work. Unless you're
+  getting a compiler error, you most likely don't need to change it.
+- The full equivalent of what `T: NonAggregate` used to mean is:
+
+      where
+          T: ValidGrouping<()>,
+          T::IsAggregate: MixedGrouping<is_aggregate::No, Output = is_aggregate::No>,
+          is_aggreagte::No: MixedGrouping<T::IsAggregate, Output = is_aggreagte::No>,
+
+- With `feature = "unstable"`, `T: NonAggregate` implies the first two bounds,
+  but not the third. On stable only the first bound is implied. This is a
+  language limitation.
+- `T: NonAggregate` can still be passed everywhere it could before, but `T:
+  NonAggregate` no longer implies `(OtherType, T): NonAggregate`.
+  - With `feature = "unstable"`, `(T, OtherType): NonAggregate` is still implied.
 
 [2-0-migration]: FIXME write a migration guide
+
+## [1.4.4] - 2020-03-22
+
+### Fixed
+
+* Update several dependencies
+* Fixed a bug with printing embeded migrations
+
+## [1.4.3] - 2019-10-11
+
+### Fixed
+
+* Updated several dependencies
+* Fixed an issue where the postgresql backend exploits implementation defined behaviour
+* Fixed issue where rustdoc failed to build the documentation
+* `diesel_derives` and `diesel_migrations` are updated to syn 1.0
+
 
 ## [1.4.2] - 2019-03-19
 
@@ -1685,3 +1786,5 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 [1.4.0]: https://github.com/diesel-rs/diesel/compare/v1.3.0...v1.4.0
 [1.4.1]: https://github.com/diesel-rs/diesel/compare/v1.4.0...v1.4.1
 [1.4.2]: https://github.com/diesel-rs/diesel/compare/v1.4.1...v1.4.2
+[1.4.3]: https://github.com/diesel-rs/diesel/compare/v1.4.2...v1.4.3
+[1.4.4]: https://github.com/diesel-rs/diesel/compare/v1.4.3...v1.4.4

@@ -17,7 +17,7 @@ mod dsl_impls;
 pub use self::boxed::BoxedSelectStatement;
 
 use super::distinct_clause::NoDistinctClause;
-use super::group_by_clause::NoGroupByClause;
+use super::group_by_clause::*;
 use super::limit_clause::NoLimitClause;
 use super::locking_clause::NoLockingClause;
 use super::offset_clause::NoOffsetClause;
@@ -28,7 +28,8 @@ use super::{AstPass, Query, QueryFragment};
 use crate::backend::Backend;
 use crate::expression::subselect::ValidSubselect;
 use crate::expression::*;
-use crate::query_builder::SelectQuery;
+use crate::query_builder::limit_offset_clause::LimitOffsetClause;
+use crate::query_builder::{QueryId, SelectQuery};
 use crate::query_source::joins::{AppendSelection, Inner, Join};
 use crate::query_source::*;
 use crate::result::QueryResult;
@@ -42,8 +43,7 @@ pub struct SelectStatement<
     Distinct = NoDistinctClause,
     Where = NoWhereClause,
     Order = NoOrderClause,
-    Limit = NoLimitClause,
-    Offset = NoOffsetClause,
+    LimitOffset = LimitOffsetClause<NoLimitClause, NoOffsetClause>,
     GroupBy = NoGroupByClause,
     Locking = NoLockingClause,
 > {
@@ -52,13 +52,12 @@ pub struct SelectStatement<
     pub(crate) distinct: Distinct,
     pub(crate) where_clause: Where,
     pub(crate) order: Order,
-    pub(crate) limit: Limit,
-    pub(crate) offset: Offset,
+    pub(crate) limit_offset: LimitOffset,
     pub(crate) group_by: GroupBy,
     pub(crate) locking: Locking,
 }
 
-impl<F, S, D, W, O, L, Of, G, LC> SelectStatement<F, S, D, W, O, L, Of, G, LC> {
+impl<F, S, D, W, O, LOf, G, LC> SelectStatement<F, S, D, W, O, LOf, G, LC> {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         select: S,
@@ -66,21 +65,19 @@ impl<F, S, D, W, O, L, Of, G, LC> SelectStatement<F, S, D, W, O, L, Of, G, LC> {
         distinct: D,
         where_clause: W,
         order: O,
-        limit: L,
-        offset: Of,
+        limit_offset: LOf,
         group_by: G,
         locking: LC,
     ) -> Self {
         SelectStatement {
-            select: select,
-            from: from,
-            distinct: distinct,
-            where_clause: where_clause,
-            order: order,
-            limit: limit,
-            offset: offset,
-            group_by: group_by,
-            locking: locking,
+            select,
+            from,
+            distinct,
+            where_clause,
+            order,
+            limit_offset,
+            group_by,
+            locking,
         }
     }
 }
@@ -93,31 +90,34 @@ impl<F> SelectStatement<F> {
             NoDistinctClause,
             NoWhereClause,
             NoOrderClause,
-            NoLimitClause,
-            NoOffsetClause,
+            LimitOffsetClause {
+                limit_clause: NoLimitClause,
+                offset_clause: NoOffsetClause,
+            },
             NoGroupByClause,
             NoLockingClause,
         )
     }
 }
 
-impl<F, S, D, W, O, L, Of, G, LC> Query for SelectStatement<F, S, D, W, O, L, Of, G, LC>
+impl<F, S, D, W, O, LOf, G, LC> Query for SelectStatement<F, S, D, W, O, LOf, G, LC>
 where
+    G: ValidGroupByClause,
     S: SelectClauseExpression<F>,
+    S::Selection: ValidGrouping<G::Expressions>,
     W: ValidWhereClause<F>,
 {
     type SqlType = S::SelectClauseSqlType;
 }
 
-impl<F, S, D, W, O, L, Of, G, LC> SelectQuery for SelectStatement<F, S, D, W, O, L, Of, G, LC>
+impl<F, S, D, W, O, LOf, G, LC> SelectQuery for SelectStatement<F, S, D, W, O, LOf, G, LC>
 where
     S: SelectClauseExpression<F>,
 {
     type SqlType = S::SelectClauseSqlType;
 }
 
-impl<F, S, D, W, O, L, Of, G, LC, DB> QueryFragment<DB>
-    for SelectStatement<F, S, D, W, O, L, Of, G, LC>
+impl<F, S, D, W, O, LOf, G, LC, DB> QueryFragment<DB> for SelectStatement<F, S, D, W, O, LOf, G, LC>
 where
     DB: Backend,
     S: SelectClauseQueryFragment<F, DB>,
@@ -126,8 +126,7 @@ where
     D: QueryFragment<DB>,
     W: QueryFragment<DB>,
     O: QueryFragment<DB>,
-    L: QueryFragment<DB>,
-    Of: QueryFragment<DB>,
+    LOf: QueryFragment<DB>,
     G: QueryFragment<DB>,
     LC: QueryFragment<DB>,
 {
@@ -140,23 +139,20 @@ where
         self.where_clause.walk_ast(out.reborrow())?;
         self.group_by.walk_ast(out.reborrow())?;
         self.order.walk_ast(out.reborrow())?;
-        self.limit.walk_ast(out.reborrow())?;
-        self.offset.walk_ast(out.reborrow())?;
+        self.limit_offset.walk_ast(out.reborrow())?;
         self.locking.walk_ast(out.reborrow())?;
         Ok(())
     }
 }
 
-impl<S, D, W, O, L, Of, G, LC, DB> QueryFragment<DB>
-    for SelectStatement<(), S, D, W, O, L, Of, G, LC>
+impl<S, D, W, O, LOf, G, LC, DB> QueryFragment<DB> for SelectStatement<(), S, D, W, O, LOf, G, LC>
 where
     DB: Backend,
     S: SelectClauseQueryFragment<(), DB>,
     D: QueryFragment<DB>,
     W: QueryFragment<DB>,
     O: QueryFragment<DB>,
-    L: QueryFragment<DB>,
-    Of: QueryFragment<DB>,
+    LOf: QueryFragment<DB>,
     G: QueryFragment<DB>,
     LC: QueryFragment<DB>,
 {
@@ -167,15 +163,14 @@ where
         self.where_clause.walk_ast(out.reborrow())?;
         self.group_by.walk_ast(out.reborrow())?;
         self.order.walk_ast(out.reborrow())?;
-        self.limit.walk_ast(out.reborrow())?;
-        self.offset.walk_ast(out.reborrow())?;
+        self.limit_offset.walk_ast(out.reborrow())?;
         self.locking.walk_ast(out.reborrow())?;
         Ok(())
     }
 }
 
-impl<S, F, D, W, O, L, Of, G, LC, QS> ValidSubselect<QS>
-    for SelectStatement<F, S, D, W, O, L, Of, LC, G>
+impl<S, F, D, W, O, LOf, G, LC, QS> ValidSubselect<QS>
+    for SelectStatement<F, S, D, W, O, LOf, LC, G>
 where
     Self: SelectQuery,
     W: ValidWhereClause<Join<F, QS, Inner>>,

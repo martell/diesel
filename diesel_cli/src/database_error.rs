@@ -2,6 +2,7 @@ use diesel::result;
 
 use std::convert::From;
 use std::error::Error;
+use std::path::PathBuf;
 use std::{fmt, io};
 
 use self::DatabaseError::*;
@@ -10,7 +11,7 @@ pub type DatabaseResult<T> = Result<T, DatabaseError>;
 
 #[derive(Debug)]
 pub enum DatabaseError {
-    CargoTomlNotFound,
+    ProjectRootNotFound(PathBuf),
     DatabaseUrlMissing,
     IoError(io::Error),
     QueryError(result::Error),
@@ -35,41 +36,37 @@ impl From<result::ConnectionError> for DatabaseError {
     }
 }
 
-impl Error for DatabaseError {
-    fn description(&self) -> &str {
-        match *self {
-            CargoTomlNotFound => {
-                "Unable to find Cargo.toml in this directory or any parent directories."
-            }
-            DatabaseUrlMissing => {
-                "The --database-url argument must be passed, or the DATABASE_URL environment variable must be set."
-            }
-            IoError(ref error) => error
-                .source()
-                .map(Error::description)
-                .unwrap_or_else(|| error.description()),
-            QueryError(ref error) => error
-                .source()
-                .map(Error::description)
-                .unwrap_or_else(|| error.description()),
-            ConnectionError(ref error) => error
-                .source()
-                .map(Error::description)
-                .unwrap_or_else(|| error.description()),
-        }
-    }
-}
+impl Error for DatabaseError {}
 
 impl fmt::Display for DatabaseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        self.description().fmt(f)
+        match *self {
+            ProjectRootNotFound(ref p) => {
+                write!(f, "Unable to find diesel.toml or Cargo.toml in {:?} or any parent directories.", p)
+            }
+            DatabaseUrlMissing => {
+                f.write_str("The --database-url argument must be passed, or the DATABASE_URL environment variable must be set.")
+            }
+            IoError(ref error) => f.write_str(&error
+                .source()
+                .map(ToString::to_string)
+                .unwrap_or_else(|| error.to_string())),
+            QueryError(ref error) => f.write_str(&error
+                .source()
+                .map(ToString::to_string)
+                .unwrap_or_else(|| error.to_string())),
+            ConnectionError(ref error) => f.write_str(&error
+                .source()
+                .map(ToString::to_string)
+                .unwrap_or_else(|| error.to_string())),
+        }
     }
 }
 
 impl PartialEq for DatabaseError {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (&CargoTomlNotFound, &CargoTomlNotFound) => true,
+            (&ProjectRootNotFound(_), &ProjectRootNotFound(_)) => true,
             _ => false,
         }
     }

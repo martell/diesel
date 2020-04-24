@@ -93,7 +93,7 @@
 //! You can come ask for help at
 //! [gitter.im/diesel-rs/diesel](https://gitter.im/diesel-rs/diesel)
 
-#![cfg_attr(feature = "unstable", feature(specialization))]
+#![cfg_attr(feature = "unstable", feature(specialization, trait_alias))]
 // Built-in Lints
 #![deny(warnings)]
 #![warn(
@@ -103,11 +103,12 @@
 )]
 // Clippy lints
 #![allow(
+    clippy::match_same_arms,
+    clippy::needless_doctest_main,
     clippy::option_map_unwrap_or_else,
     clippy::option_map_unwrap_or,
-    clippy::match_same_arms,
-    clippy::type_complexity,
-    clippy::redundant_field_names
+    clippy::redundant_field_names,
+    clippy::type_complexity
 )]
 #![cfg_attr(test, allow(clippy::option_map_unwrap_or, clippy::result_unwrap_used))]
 #![warn(
@@ -126,13 +127,11 @@
 )]
 
 extern crate byteorder;
-#[macro_use]
 extern crate diesel_derives;
-#[doc(hidden)]
-pub use diesel_derives::*;
 
 #[macro_use]
-mod macros;
+#[doc(hidden)]
+pub mod macros;
 
 #[cfg(test)]
 #[macro_use]
@@ -158,6 +157,7 @@ pub mod query_source;
 pub mod r2d2;
 pub mod result;
 pub mod serialize;
+pub mod upsert;
 #[macro_use]
 pub mod sql_types;
 pub mod migration;
@@ -172,6 +172,11 @@ pub mod sqlite;
 
 mod type_impls;
 mod util;
+
+#[doc(hidden)]
+#[cfg(feature = "with-deprecated")]
+#[deprecated(since = "2.0.0", note = "Use explicit macro imports instead")]
+pub use diesel_derives::*;
 
 pub mod dsl {
     //! Includes various helper types and bare functions which are named too
@@ -257,9 +262,17 @@ pub mod helper_types {
     pub type InnerJoin<Source, Rhs> =
         <Source as JoinWithImplicitOnClause<Rhs, joins::Inner>>::Output;
 
+    /// Represents the return type of `.inner_join(rhs.on(on))`
+    pub type InnerJoinOn<Source, Rhs, On> =
+        <Source as InternalJoinDsl<Rhs, joins::Inner, On>>::Output;
+
     /// Represents the return type of `.left_join(rhs)`
     pub type LeftJoin<Source, Rhs> =
         <Source as JoinWithImplicitOnClause<Rhs, joins::LeftOuter>>::Output;
+
+    /// Represents the return type of `.left_join(rhs.on(on))`
+    pub type LeftJoinOn<Source, Rhs, On> =
+        <Source as InternalJoinDsl<Rhs, joins::LeftOuter, On>>::Output;
 
     use super::associations::HasTable;
     use super::query_builder::{AsChangeset, IntoUpdateTarget, UpdateStatement};
@@ -289,33 +302,48 @@ pub mod helper_types {
 
 pub mod prelude {
     //! Re-exports important traits and types. Meant to be glob imported when using Diesel.
-    pub use crate::associations::{GroupedBy, Identifiable};
+
+    #[doc(inline)]
+    pub use crate::associations::{Associations, GroupedBy, Identifiable};
+    #[doc(inline)]
     pub use crate::connection::Connection;
-    #[deprecated(
-        since = "1.1.0",
-        note = "Explicitly `use diesel::deserialize::Queryable"
-    )]
-    pub use crate::deserialize::Queryable;
+    #[doc(inline)]
+    pub use crate::deserialize::{Queryable, QueryableByName};
+    #[doc(inline)]
     pub use crate::expression::{
         AppearsOnTable, BoxableExpression, Expression, IntoSql, SelectableExpression,
     };
+
+    #[doc(inline)]
+    pub use crate::expression::functions::sql_function;
+
+    #[doc(inline)]
     pub use crate::expression_methods::*;
     #[doc(inline)]
     pub use crate::insertable::Insertable;
+    #[doc(inline)]
+    pub use crate::macros::prelude::*;
+    #[doc(inline)]
+    pub use crate::query_builder::AsChangeset;
     #[doc(hidden)]
     pub use crate::query_dsl::GroupByDsl;
+    #[doc(inline)]
     pub use crate::query_dsl::{BelongingToDsl, JoinOnDsl, QueryDsl, RunQueryDsl, SaveChangesDsl};
-
+    #[doc(inline)]
     pub use crate::query_source::{Column, JoinTo, QuerySource, Table};
+    #[doc(inline)]
     pub use crate::result::{ConnectionError, ConnectionResult, OptionalExtension, QueryResult};
 
     #[cfg(feature = "mysql")]
+    #[doc(inline)]
     pub use crate::mysql::MysqlConnection;
     #[cfg(feature = "postgres")]
+    #[doc(inline)]
     pub use crate::pg::PgConnection;
     #[cfg(feature = "unstable_pure_rust_postgres")]
     pub use crate::pg::PostgresConnection;
     #[cfg(feature = "sqlite")]
+    #[doc(inline)]
     pub use crate::sqlite::SqliteConnection;
 }
 
